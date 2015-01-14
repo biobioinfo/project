@@ -38,3 +38,9 @@ and evaluated on this model.
 
 Try the implementation with other regulatory networks.
 
+##Usage
+The script.sh files copies the java files at the correct location. Before running it, you must either 
+set the GINSIM varible to the installation folder of GINSIM or give the path to this folder as an argument
+to the script.
+Once this is done, GINsim must be recompiled to integrate the changes.
+
