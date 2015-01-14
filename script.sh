@@ -6,5 +6,5 @@ fi
 if [ -z "$GINPATH" ] ; then 
 	echo "Please either set environement variable GINSIM to the path of GINsim folder, or provide it as argument"
 else
-	cp -R -t $1/src/main java
+	cp -R -t $GINPATH/src/main java
 fi
