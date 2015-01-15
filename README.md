@@ -23,12 +23,12 @@ and evaluated on this model.
 
 ## TODO
 
-- [ ] Setup GitHub
+- [x] Setup GitHub
 - [ ] Implement the Boolean model for the network of blood stem cell using GINsim
   - [ ] Specify the regulatory network
   - [ ] Simulate the associated boolean model
   - [ ] Analyse the state transition
-- [ ] Implement a dummy plugin (i.e. check our comprehension of the organization of plugins)
+- [x] Implement a dummy plugin (i.e. check our comprehension of the organization of plugins)
 - [ ] Implement the plugin for the analysis of the differentiation triggers
 - [ ] Create the documentation
 - [ ] Implement tests
@@ -38,9 +38,12 @@ and evaluated on this model.
 
 Try the implementation with other regulatory networks.
 
+
 ##Usage
-The script.sh files copies the java files at the correct location. Before running it, you must either 
-set the GINSIM varible to the installation folder of GINSIM or give the path to this folder as an argument
+
+The `script.sh` files copies the java files at the correct location. Before running it, you must either 
+set the `GINSIM` variable to the project folder of GINsim or give the path to this folder as an argument
 to the script.
+
 Once this is done, GINsim must be recompiled to integrate the changes.
 
