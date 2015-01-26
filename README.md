@@ -25,8 +25,8 @@ and evaluated on this model.
 
 - [x] Setup GitHub
 - [ ] Implement the Boolean model for the network of blood stem cell using GINsim
-  - [ ] Specify the regulatory network
-  - [ ] Simulate the associated boolean model
+  - [x] Specify the regulatory network
+  - [x] Simulate the associated boolean model
   - [ ] Analyse the state transition
 - [x] Implement a dummy plugin (i.e. check our comprehension of the organization of plugins)
 - [ ] Implement the plugin for the analysis of the differentiation triggers
