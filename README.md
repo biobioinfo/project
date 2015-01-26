@@ -20,6 +20,13 @@ updating could then be performed, with the help of the following software:
 could be implemented (either as independent code, or as a plugging for GINsim)
 and evaluated on this model.
 
+### Additional materials
+- [Finding Attractors in Synchronous Multiple-Valued Networks Using SAT-based Bounded Model Checking](http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=5489232)
+  Elena Dubrova, Liu Ming and Maxim Teslenko
+- [Synchronous versus asynchronous modeling of gene regulatory networks](http://bioinformatics.oxfordjournals.org/content/24/17/1917.long)
+  Abhishek Garg, Alessandro Di Cara, Ioannis Xenarios, Luis Mendoza and Giovanni De Micheli
+- [LogicalModels](https://github.com/colomoto/logicalmodel)
+  Aurélien Naldi
 
 ## TODO
 
