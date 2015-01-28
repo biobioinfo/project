@@ -2,20 +2,17 @@ package org.ginsim.service.tool.pushcount;
 
 
 import java.text.ParseException;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
-import javax.swing.text.html.ListView;
 
 import org.colomoto.common.task.AbstractTask;
 import org.colomoto.logicalmodel.LogicalModel;
 import org.colomoto.mddlib.MDDManager;
 import org.colomoto.mddlib.MDDManagerFactory;
-import org.colomoto.mddlib.MDDOperator;
 import org.colomoto.mddlib.MDDVariable;
 import org.colomoto.mddlib.MDDVariableFactory;
 import org.colomoto.mddlib.operators.MDDBaseOperators;
-import org.omg.CORBA.NVList;
 
 public class PushCountSearcher extends AbstractTask<Object> {
 	
@@ -27,12 +24,18 @@ public class PushCountSearcher extends AbstractTask<Object> {
 	private int varNum ;
 	
 	//List of the new variables
-	private List<MDDVariable> varList ;
+	private List<MDDVariable> varList = new ArrayList<MDDVariable>() ;
 	
 	//Copy of the functions into the tempManager
 	int[] tempFunc ;
+	
+	//BDD representing the source states
+	int tempSource ;
+	
+	//BDD representing the target states
+	int tempTarget ;
 
-	public PushCountSearcher(LogicalModel model) throws ParseException {
+	public PushCountSearcher(LogicalModel model, int source, int target) throws ParseException {
 		this.model = model ;
 		MDDManager manager = model.getMDDManager() ;
 
@@ -55,17 +58,38 @@ public class PushCountSearcher extends AbstractTask<Object> {
 			varList.add(tempManager.getVariableForKey(allVars.get(i))) ;
 		
 		int[] func = model.getLogicalFunctions() ;
+		tempFunc = new int[func.length] ;
 		for(int i = 0 ; i<func.length ; i++)
-		{
 			tempFunc[i] = tempManager.parseDump(manager.dumpMDD(func[i])) ;
-		}
+		
+		tempSource = tempManager.parseDump(manager.dumpMDD(source)) ;
+		tempTarget = tempManager.parseDump(manager.dumpMDD(target)) ;
 		
 	}
 
 	@Override
-	protected Object doGetResult() throws Exception {
+	public Object doGetResult() throws Exception {
+		System.out.println("Running") ;
+		int bdd = getPredecessors(getSynchronousTransitionFunction(), tempTarget) ;
+		bdd = model.getMDDManager().parseDump(tempManager.dumpMDD(bdd)) ;
 		
+		System.out.println(model.getMDDManager().dumpMDD(bdd)) ;
+		for(int i = 0 ; i < varNum ; i++)
+			System.out.println(i + " : " + varList.get(i) ) ;
 		
+		int iter = 0 ;
+		Iterator<byte[]> it = AssignmentsEnum.getAssignments(model.getMDDManager(), bdd) ;
+		while(it.hasNext())
+		{
+			byte[] r = it.next() ;
+			System.out.print("res: ") ;
+			for(int i = 0 ; i < r.length ; i++)
+				System.out.print(r[i]) ;
+			System.out.println() ;
+			iter ++ ;
+			if(iter > 100)
+				return null; 
+		}
 		return null ;
 	}
 	
@@ -77,12 +101,30 @@ public class PushCountSearcher extends AbstractTask<Object> {
 	 */
 	int getSynchronousTransitionFunction(){
 		int[] fi = new int[tempFunc.length] ;
+		MDDVariable[] xVars = varList.subList(0, varNum).toArray(new MDDVariable[0]) ;
+		MDDVariable[] yVars = varList.subList(varNum, 2*varNum).toArray(new MDDVariable[0]) ;
+		
 		
 		for(int i = 0 ; i < fi.length ; i ++)
 		{
-			MDDVariable var = varList.get(i) ;
-			fi[i] = NewOps.EQUAL.combine(tempManager, tempFunc[i], getVariableValue(var)) ;
+			int xi = getVariableValue(xVars[i]) ;
+			int yi = getVariableValue(yVars[i]) ;
+			int i1 = MDDBaseOperators.AND.combine(tempManager, 
+					SimpleOperator.EQUAL.combine(tempManager, tempFunc[i], xi),
+					SimpleOperator.EQUAL.combine(tempManager, xi, yi));
+			
+			int i2 = MDDBaseOperators.AND.combine(tempManager, 
+					SimpleOperator.GREATER_THAN.combine(tempManager, tempFunc[i], xi),
+					SimpleOperator.EQUAL.combine(tempManager, 
+							SimpleOperator.ADD.combine(tempManager, xi, 1), yi)) ;
+			int i3 = MDDBaseOperators.AND.combine(tempManager, 
+					SimpleOperator.LESS_THAN.combine(tempManager, tempFunc[i], xi),
+					SimpleOperator.EQUAL.combine(tempManager, 
+							SimpleOperator.SUB.combine(tempManager, xi, 1), yi)) ;
+			fi[i] = MDDBaseOperators.OR.combine(tempManager, new int[]{i1 , i2, i3}) ;
+			System.out.println(tempManager.dumpMDD(fi[i])) ;
 		}
+		System.out.println();
 		//Function whose value is true on x,y iff (x,y) is a transition
 		int f = MDDBaseOperators.AND.combine(tempManager, fi) ;
 		
@@ -107,17 +149,17 @@ public class PushCountSearcher extends AbstractTask<Object> {
 			for(int j = 0 ; j < varNum ; i ++)
 			{
 				if(j != i)
-					fij[j] = NewOps.EQUAL.combine(tempManager, 
+					fij[j] = SimpleOperator.EQUAL.combine(tempManager, 
 							getVariableValue(varList.get(j)), 
 							getVariableValue(varList.get(varNum + j))) ;
 				else
-					fij[j] = NewOps.EQUAL.combine(tempManager, 
+					fij[j] = SimpleOperator.EQUAL.combine(tempManager, 
 							getVariableValue(varList.get(varNum + i)), tempFunc[i]) ;
 			}
-			fi[i] = NewOps.MIN.combine(tempManager, fij) ;
+			fi[i] = SimpleOperator.MIN.combine(tempManager, fij) ;
 		}
 		
-		return NewOps.MAX.combine(tempManager, fi) ;
+		return SimpleOperator.MAX.combine(tempManager, fi) ;
 	}
 	
 	/**
@@ -137,7 +179,7 @@ public class PushCountSearcher extends AbstractTask<Object> {
 	
 	/**
 	 * Returns an MDD that represents the set of states that can reach one of 
-	 * the states described by startStates
+	 * the states described by startStates in 0, 1, or more transitions
 	 * @param f : the transition function
 	 * @param startStates : the set of initial states
 	 * @return
@@ -145,13 +187,18 @@ public class PushCountSearcher extends AbstractTask<Object> {
 	int getPredecessors(int f, int startStates){
 		int oldSet = 0 ;
 		int newSet = startStates ;
+		MDDVariable[] xVars = varList.subList(0, varNum).toArray(new MDDVariable[0]) ;
+		MDDVariable[] yVars = varList.subList(varNum, 2*varNum).toArray(new MDDVariable[0]) ;
 		while(oldSet != newSet)
 		{
 			oldSet = newSet ;
-			//newSet = NewOps.QUANTIFY_MIN.
+			newSet = SimpleOperator.substitute(tempManager, xVars, yVars, newSet) ;
+			newSet = SimpleOperator.MIN.combine(tempManager, f, newSet) ;
+			newSet = MDDQuantifier.QUANTIFY_MAX.combine(tempManager, yVars, newSet) ;
+			newSet = MDDBaseOperators.OR.combine(tempManager, newSet, oldSet) ;
 		}
 			
-		return 0 ;
+		return newSet ;
 	}
 
 }

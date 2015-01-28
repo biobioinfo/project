@@ -8,8 +8,9 @@ import org.colomoto.mddlib.MDDManager;
 /**
  * Utility class used to copy a certain MDD from one MDD manager to an other.
  * The primary use of this class it to circumvent the fact that it is not possible to 
- * add new variables into a MDDManager, so the creation of a new one is needed to perform some operations
- * 
+ * add new variables into a MDDManager, so the creation of a new one is needed to 
+ * perform some operations
+ * Not used for now.... consider removing this
  * @author heinrich
  *
  */

@@ -18,6 +18,8 @@ import org.ginsim.commongui.dialog.DefaultDialogSize;
 import org.ginsim.core.graph.Graph;
 import org.ginsim.core.graph.dynamicgraph.DynamicGraph;
 import org.ginsim.core.graph.regulatorygraph.RegulatoryGraph;
+import org.ginsim.core.graph.regulatorygraph.namedstates.NamedState;
+import org.ginsim.core.graph.regulatorygraph.namedstates.NamedStateList;
 import org.ginsim.core.graph.regulatorygraph.namedstates.NamedStatesHandler;
 import org.ginsim.core.service.EStatus;
 import org.ginsim.core.service.ServiceManager;
@@ -25,18 +27,13 @@ import org.ginsim.core.service.ServiceStatus;
 import org.ginsim.gui.GUIManager;
 import org.ginsim.gui.graph.regulatorygraph.initialstate.InitialStatePanel;
 import org.ginsim.gui.graph.regulatorygraph.initialstate.InitialStatesGUIHelper;
-import org.ginsim.gui.graph.view.style.StyleColorizerCheckbox;
 import org.ginsim.gui.service.AbstractServiceGUI;
 import org.ginsim.gui.service.GUIFor;
 import org.ginsim.gui.service.ServiceGUI;
 import org.ginsim.gui.shell.actions.ToolAction;
 import org.ginsim.gui.utils.dialog.stackdialog.StackDialog;
-import org.ginsim.service.tool.dummy.DummyService;
 import org.ginsim.service.tool.pushcount.PushCountSearcher;
 import org.ginsim.service.tool.pushcount.PushCountService;
-import org.ginsim.servicegui.export.cadp.InitialStatesWidget;
-import org.ginsim.servicegui.tool.composition.CompositionPanel;
-import org.ginsim.servicegui.tool.regulatorygraphanimation.LRGStateStyleProvider;
 
 /**
  * Service that serves as a GUI for the PushCountService. 
@@ -84,7 +81,9 @@ public class PushCountServiceGUI extends AbstractServiceGUI {
 		private JPanel mainPanel = new JPanel() ;
 		private InitialStatesGUIHelper initStates ; 
 		private InitialStatePanel sourceComp ;
+		private NamedStatesHandler sourceHandler ;
 		private InitialStatePanel targetComp ;
+		private NamedStatesHandler targetHandler ;
 		
 		private final PushCountService service = ServiceManager.getManager().getService(PushCountService.class);
 		
@@ -93,8 +92,10 @@ public class PushCountServiceGUI extends AbstractServiceGUI {
 					"Push Count", 600, 600) ;
 			this.graph = graph ;
 			initStates = new InitialStatesGUIHelper() ;
-			sourceComp = new InitialStatePanel(graph, true) ;
-			targetComp = new InitialStatePanel(graph, true) ;
+			sourceHandler = new NamedStatesHandler(graph) ;
+			targetHandler = new NamedStatesHandler(graph) ;
+			sourceComp = new InitialStatePanel(sourceHandler, true) ;
+			targetComp = new InitialStatePanel(targetHandler, true) ;
 			intialize() ;
 		}
 
@@ -110,7 +111,13 @@ public class PushCountServiceGUI extends AbstractServiceGUI {
 		
 		@Override
 		protected void run() throws GsException {
-			service.getSearcher(graph).run() ;
+			NamedStateList source = sourceHandler.getInitialStates() ;
+			NamedStateList target = targetHandler.getInitialStates() ;
+			try{
+			service.getSearcher(graph, source, target).doGetResult() ;
+			} catch (Exception e) {
+				e.printStackTrace() ;
+			}
 			closeEvent() ;
 		}
 	}

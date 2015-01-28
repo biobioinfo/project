@@ -11,6 +11,10 @@ import org.colomoto.mddlib.MDDVariable;
  */
 public interface MDDQuantifier {
 	
+	public static MDDQuantifier QUANTIFY_MAX = new AbstractQuantifier(SimpleOperator.MAX) ;
+
+	public static MDDQuantifier QUANTIFY_MIN = new AbstractQuantifier(SimpleOperator.MIN) ;
+
 	/**
 	 * Quantifies over the variable var
 	 * @param m
@@ -19,7 +23,7 @@ public interface MDDQuantifier {
 	 * @return the new MDD where the variable var was quantified out.
 	 */
 	public int combine(MDDManager m, MDDVariable var, int mdd) ;
-	
+
 	/**
 	 * Quatifies over all the given variables
 	 * @param m
@@ -29,4 +33,6 @@ public interface MDDQuantifier {
 	 */
 	public int combine(MDDManager m, MDDVariable[] vars, int mdd) ;
 
+	
 }
+
