@@ -4,6 +4,7 @@ import java.text.ParseException;
 
 import org.colomoto.logicalmodel.LogicalModel;
 import org.colomoto.mddlib.MDDManager;
+import org.colomoto.mddlib.operators.MDDBaseOperators;
 import org.ginsim.core.graph.regulatorygraph.RegulatoryGraph;
 import org.ginsim.core.graph.regulatorygraph.namedstates.NamedStateList;
 import org.ginsim.core.service.Alias;
@@ -19,6 +20,11 @@ import org.mangosdk.spi.ProviderFor;
 public class PushCountService implements Service{
 	
 	public PushCountSearcher getSearcher(RegulatoryGraph g, 
+			NamedStateList source, NamedStateList target) {
+		return getSearcher(g.getModel(), source, target) ;
+	}
+	
+	public PushCountSearcher getSearcher(LogicalModel model, 
 			NamedStateList source, NamedStateList target){
 		if(source.size() == 0)
 		{
@@ -31,7 +37,6 @@ public class PushCountService implements Service{
 			return null; 
 		}
 		
-		LogicalModel model = g.getModel() ;
 		MDDManager m = model.getMDDManager() ;
 		int[] sourceMDDs = new int[source.size()] ;
 		for(int i = 0 ; i < source.size() ; i++)
@@ -46,12 +51,12 @@ public class PushCountService implements Service{
 		if(sourceMDDs.length == 1)
 			sMDD = sourceMDDs[0] ;
 		else 
-			sMDD = NewOps.MAX.combine(m, sourceMDDs) ;
+			sMDD = MDDBaseOperators.OR.combine(m, sourceMDDs) ;
 		
 		if(targetMDDs.length == 1)
 			tMDD = targetMDDs[0] ;
 		else 
-			tMDD = NewOps.MAX.combine(m, targetMDDs) ;
+			tMDD = MDDBaseOperators.OR.combine(m, targetMDDs) ;
 		
 		return getSearcher(model, sMDD, tMDD ) ;
 	}
@@ -64,8 +69,4 @@ public class PushCountService implements Service{
 			return null ;
 		}
 	}
-	
-	
-	
-
 }

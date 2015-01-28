@@ -61,7 +61,7 @@ public class PushCountServiceGUI extends AbstractServiceGUI {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					new PCServiceUI((RegulatoryGraph) graph) ;
+					new PushCountSwingUI((RegulatoryGraph) graph) ;
 				}
 			};
 			acc.add(action) ;
@@ -73,53 +73,6 @@ public class PushCountServiceGUI extends AbstractServiceGUI {
 	@Override
 	public int getInitialWeight() {
 		return W_TOOLS_MAIN + 20;
-	}
-	
-	private static class PCServiceUI extends StackDialog{
-		private RegulatoryGraph graph ;
-		
-		private JPanel mainPanel = new JPanel() ;
-		private InitialStatesGUIHelper initStates ; 
-		private InitialStatePanel sourceComp ;
-		private NamedStatesHandler sourceHandler ;
-		private InitialStatePanel targetComp ;
-		private NamedStatesHandler targetHandler ;
-		
-		private final PushCountService service = ServiceManager.getManager().getService(PushCountService.class);
-		
-		public PCServiceUI(RegulatoryGraph graph) {
-			super(GUIManager.getInstance().getFrame(graph), 
-					"Push Count", 600, 600) ;
-			this.graph = graph ;
-			initStates = new InitialStatesGUIHelper() ;
-			sourceHandler = new NamedStatesHandler(graph) ;
-			targetHandler = new NamedStatesHandler(graph) ;
-			sourceComp = new InitialStatePanel(sourceHandler, true) ;
-			targetComp = new InitialStatePanel(targetHandler, true) ;
-			intialize() ;
-		}
-
-		protected void intialize(){
-			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS)) ;
-			setMainPanel(mainPanel) ;
-			mainPanel.add(sourceComp) ;
-			mainPanel.add(targetComp) ;
-			sourceComp.setMessage(Txt.t("STR_select_source")) ;
-			targetComp.setMessage(Txt.t("STR_select_target")) ;
-			setVisible(true) ;
-		}
-		
-		@Override
-		protected void run() throws GsException {
-			NamedStateList source = sourceHandler.getInitialStates() ;
-			NamedStateList target = targetHandler.getInitialStates() ;
-			try{
-			service.getSearcher(graph, source, target).doGetResult() ;
-			} catch (Exception e) {
-				e.printStackTrace() ;
-			}
-			closeEvent() ;
-		}
 	}
 
 }
