@@ -70,7 +70,10 @@ public class PushCountSearcher extends AbstractTask<Object> {
 	@Override
 	public Object doGetResult() throws Exception {
 		System.out.println("Running") ;
-		int bdd = getPredecessors(getSynchronousTransitionFunction(), tempTarget) ;
+		int async = getAsynchronousTransitionFunction() ;
+		System.out.println("Computed f_async") ;
+		int bdd = getPredecessors(async, tempTarget) ;
+		System.out.println("Computed predecessors") ;
 		bdd = model.getMDDManager().parseDump(tempManager.dumpMDD(bdd)) ;
 		
 		System.out.println(model.getMDDManager().dumpMDD(bdd)) ;
@@ -124,7 +127,6 @@ public class PushCountSearcher extends AbstractTask<Object> {
 			fi[i] = MDDBaseOperators.OR.combine(tempManager, new int[]{i1 , i2, i3}) ;
 			System.out.println(tempManager.dumpMDD(fi[i])) ;
 		}
-		System.out.println();
 		//Function whose value is true on x,y iff (x,y) is a transition
 		int f = MDDBaseOperators.AND.combine(tempManager, fi) ;
 		
@@ -140,26 +142,47 @@ public class PushCountSearcher extends AbstractTask<Object> {
 	int getAsynchronousTransitionFunction(){
 		//We can write f = OR(fi)
 		//Where the fi are defined by :
-		//fi = AND_{j \neq i} (x_j = y_j) AND (y_i = f_i(x_i))
+		//fi = AND_{j \neq i} (x_j = y_j) 
+		//	AND ((y_i = x_i AND x_i = f_i(x)) 
+		//			OR (x_i < f_i(x) AND y_i = x_i +1) 
+		//			OR x_i > f_i(x) AND y_i = x_i -1)
 		
 		int[] fi = new int[tempFunc.length] ;
 		for(int i = 0 ; i < fi.length ; i ++)
 		{
 			int[] fij = new int[varNum] ;
-			for(int j = 0 ; j < varNum ; i ++)
+			for(int j = 0 ; j < varNum ; j ++)
 			{
 				if(j != i)
 					fij[j] = SimpleOperator.EQUAL.combine(tempManager, 
 							getVariableValue(varList.get(j)), 
 							getVariableValue(varList.get(varNum + j))) ;
 				else
-					fij[j] = SimpleOperator.EQUAL.combine(tempManager, 
-							getVariableValue(varList.get(varNum + i)), tempFunc[i]) ;
+				{
+					int xi = getVariableValue(varList.get(i)) ;
+					int yi = getVariableValue(varList.get(i + varNum)) ;
+					
+					int i1 = MDDBaseOperators.AND.combine(tempManager,
+							SimpleOperator.EQUAL.combine(tempManager, xi, yi),
+							SimpleOperator.EQUAL.combine(tempManager, xi, tempFunc[i])) ;
+					int i2 = MDDBaseOperators.AND.combine(tempManager,
+							SimpleOperator.GREATER_THAN.combine(tempManager, tempFunc[i], xi),
+							SimpleOperator.EQUAL.combine(tempManager, 
+									SimpleOperator.ADD.combine(tempManager, xi, 1),
+									yi)) ;
+					int i3 = MDDBaseOperators.AND.combine(tempManager,
+							SimpleOperator.LESS_THAN.combine(tempManager, tempFunc[i], xi),
+							SimpleOperator.EQUAL.combine(tempManager, 
+									SimpleOperator.SUB.combine(tempManager, xi, 1),
+									yi)) ;
+					
+					fij[j] = MDDBaseOperators.OR.combine(tempManager, new int[]{i1,i2,i3}) ;
+				}
 			}
-			fi[i] = SimpleOperator.MIN.combine(tempManager, fij) ;
+			fi[i] = MDDBaseOperators.AND.combine(tempManager, fij) ;
 		}
 		
-		return SimpleOperator.MAX.combine(tempManager, fi) ;
+		return MDDBaseOperators.OR.combine(tempManager, fi) ;
 	}
 	
 	/**
