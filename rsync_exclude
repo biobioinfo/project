@@ -1,0 +1,9 @@
+# Emacs temporary files
+*~
+# Unwanted plugins
+/src/main/java/org/ginsim/service/tool/dummy/
+/src/main/java/org/ginsim/servicegui/tool/dummy/
+/src/main/java/org/ginsim/service/tool/cluster/
+/src/main/java/org/ginsim/servicegui/tool/cluster/
+/src/main/java/org/ginsim/service/tool/pushcount/
+/src/main/java/org/ginsim/servicegui/tool/pushcount/
