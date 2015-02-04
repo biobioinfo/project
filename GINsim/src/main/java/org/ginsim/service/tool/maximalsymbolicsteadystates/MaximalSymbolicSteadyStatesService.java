@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.ListIterator;
 
 import org.mangosdk.spi.ProviderFor;
 import org.ginsim.core.service.Service;
@@ -169,14 +170,84 @@ public class MaximalSymbolicSteadyStatesService implements Service {
 	return partition.values();
     }
     
+    /**
+     * Combine to partial state if possible or throw an exception
+     *
+     * For examples:
+     *              01?1?10   0   1   0   1   0   1   ?
+     *          and 00???1?   0   1   1   0   ?   ?   ?
+     * combine into 0??1?10   0   1   ?   ?   0   1   ?
+     */
+    private int[] combine(int[] p, int[] q) throws Exception {
+	int[] r = p.clone();
+	boolean flag = false;
+	for (int k = 0; k < p.length; k++) {
+	    if (p[k] == -1 && q[k] != -1) {
+		throw new Exception("Impossible combination");
+	    } else if ((p[k] == 0 && q[k] == 1) || (p[k] == 1 && q[k] == 0)) {
+		if (false == flag) {
+		    r[k] = -1;
+		    flag = true;
+		} else {
+		    throw new Exception("Impossible combination");
+		}
+	    } else {
+		// Don't care
+	    }
+	}
+	return r;
+    }
+    
+    // TODO: think about a more efficient way to enumerate prime implicants from MDD implicants
+    private List enumeratePrimeImplicantsOfPart(List mddPart) {
+	List primePart = new ArrayList();
+	boolean flag = false;
+	// For each MDD implicants
+	ListIterator<Implicant> iterator_1 = mddPart.listIterator();
+	while (iterator_1.hasNext()) {
+	    Implicant implicant_1 = iterator_1.next();
+	    // Declare temporary list to accumulate more primal implicant
+	    List tempPrimePart = new ArrayList();
+	    // For each MDD implicants
+	    ListIterator<Implicant> iterator_2 = mddPart.listIterator();
+	    while (iterator_2.hasNext()) {
+		Implicant implicant_2 = iterator_2.next();
+		if (implicant_1 != implicant_2) {
+		    // Try to find a more primal implicant
+		    try {
+			int[] p = combine(implicant_1.p, implicant_2.p);
+			Implicant implicant = new Implicant(p, implicant_1.c, implicant_2.v);
+			tempPrimePart.add(implicant);
+		    } catch (Exception exception) {
+			// Don't care
+		    }
+		}
+	    }
+	    if (tempPrimePart.isEmpty()) {
+		// No more primal implicant has been found
+		primePart.add(implicant_1);
+	    } else {
+		// Some more primal implicants have been found
+		primePart.addAll(tempPrimePart);
+		flag = true;
+	    }
+	}
+	
+	if (flag) {
+	    return enumeratePrimeImplicantsOfPart(primePart);
+	} else {
+	    return primePart;
+	}
+    }
+    
     private void enumeratePrimeImplicants() {
 	this.primeImplicants = new ArrayList();
 	Collection<List> partition = partitionMDDImplicants();
 	Iterator<List> iterator = partition.iterator();
 	while (iterator.hasNext()) {
-	    List part = iterator.next();
-	    // TODO: compute the prime implicants from the MDD implicants
-	    this.primeImplicants.addAll(part);
+	    List mddPart = iterator.next();
+	    List primePart = enumeratePrimeImplicantsOfPart(mddPart);
+	    this.primeImplicants.addAll(primePart);
 	}
 	return;
     }
