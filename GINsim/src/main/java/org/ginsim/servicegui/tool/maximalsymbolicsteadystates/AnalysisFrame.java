@@ -25,7 +25,8 @@ public class AnalysisFrame extends StackDialog {
 	// TODO: use Txt.t
 	setMessage("Wait!");
 	MaximalSymbolicSteadyStatesService service = ServiceManager.getManager().getService(MaximalSymbolicSteadyStatesService.class);
-	service.run(graph);
+	service.setRegulatoryGraph(graph);
+	service.run();
 	return;
     }
     
