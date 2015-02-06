@@ -3,6 +3,7 @@ package org.ginsim.service.tool.pushcount;
 import java.text.ParseException;
 
 import org.colomoto.logicalmodel.LogicalModel;
+import org.colomoto.logicalmodel.tools.pushcount.PushCountSearcher;
 import org.colomoto.mddlib.MDDManager;
 import org.colomoto.mddlib.operators.MDDBaseOperators;
 import org.ginsim.core.graph.regulatorygraph.RegulatoryGraph;
@@ -13,9 +14,9 @@ import org.ginsim.core.service.Service;
 import org.ginsim.core.service.ServiceStatus;
 import org.mangosdk.spi.ProviderFor;
 
-
+ 
 @ProviderFor(Service.class)
-@Alias("dummy")
+@Alias("pushcount")
 @ServiceStatus(EStatus.RELEASED)
 public class PushCountService implements Service{
 	

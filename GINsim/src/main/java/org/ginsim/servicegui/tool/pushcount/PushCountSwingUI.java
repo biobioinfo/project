@@ -1,14 +1,18 @@
 package org.ginsim.servicegui.tool.pushcount;
 
-import java.awt.BorderLayout;
-
 import javax.swing.BoxLayout;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 
+import org.colomoto.common.task.Task;
+import org.colomoto.common.task.TaskListener;
+import org.colomoto.common.task.TaskStatus;
 import org.colomoto.logicalmodel.LogicalModel;
+import org.colomoto.logicalmodel.tools.pushcount.PushCountResult;
+import org.colomoto.logicalmodel.tools.pushcount.PushCountSearcher;
 import org.ginsim.common.application.Txt;
+import org.ginsim.commongui.dialog.ResultsDialog;
 import org.ginsim.core.graph.regulatorygraph.RegulatoryGraph;
 import org.ginsim.core.graph.regulatorygraph.namedstates.NamedStateList;
 import org.ginsim.core.graph.regulatorygraph.namedstates.NamedStatesHandler;
@@ -58,11 +62,26 @@ public class PushCountSwingUI extends LogicalModelActionDialog {
 	public void run(LogicalModel model) {
 		NamedStateList source = sourceHandler.getInitialStates() ;
 		NamedStateList target = targetHandler.getInitialStates() ;
-		try{
-		service.getSearcher(model, source, target).doGetResult() ;
-		} catch (Exception e) {
-			e.printStackTrace() ;
-		}
+ 
+		PushCountSearcher task = service.getSearcher(model, source, target) ;
+		
+		final ResultsDialog f = new ResultsDialog(null) ;
+		//f.setSize(600, 600) ;
+		//f.setDefaultCloseOperation(DISPOSE_ON_CLOSE) ;
+		//f.setVisible(true) ;
+		
+		task.background(new TaskListener() {
+			@Override
+			public void taskUpdated(Task t) {
+				if(t.getStatus() != TaskStatus.FINISHED)
+				{
+					//TODO : print something bad
+				}
+				PushCountResult result = (PushCountResult) t.getResult() ; 
+				f.setResults(result.print()) ;
+			}
+		}) ;
+
 		closeEvent() ;
 		
 	}

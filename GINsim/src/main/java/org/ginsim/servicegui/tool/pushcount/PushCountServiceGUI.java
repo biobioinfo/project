@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 
 import org.mangosdk.spi.ProviderFor;
 
+import org.colomoto.logicalmodel.tools.pushcount.PushCountSearcher;
 import org.ginsim.common.application.GsException;
 import org.ginsim.common.application.Txt;
 import org.ginsim.commongui.dialog.DefaultDialogSize;
@@ -32,7 +33,6 @@ import org.ginsim.gui.service.GUIFor;
 import org.ginsim.gui.service.ServiceGUI;
 import org.ginsim.gui.shell.actions.ToolAction;
 import org.ginsim.gui.utils.dialog.stackdialog.StackDialog;
-import org.ginsim.service.tool.pushcount.PushCountSearcher;
 import org.ginsim.service.tool.pushcount.PushCountService;
 
 /**
