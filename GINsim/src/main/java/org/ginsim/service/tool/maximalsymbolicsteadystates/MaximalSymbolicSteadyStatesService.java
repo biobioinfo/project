@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.mangosdk.spi.ProviderFor;
 import org.ginsim.core.service.Service;
@@ -16,6 +18,9 @@ import org.ginsim.core.graph.regulatorygraph.RegulatoryGraph;
 import org.colomoto.logicalmodel.LogicalModel;
 import org.colomoto.mddlib.MDDManager;
 import org.colomoto.mddlib.MDDVariable;
+import net.sf.javailp.SolverFactory;
+import net.sf.javailp.SolverFactoryLpSolve;
+import net.sf.javailp.Solver;
 
 
 @ProviderFor(Service.class)
@@ -70,11 +75,14 @@ public class MaximalSymbolicSteadyStatesService implements Service {
 	System.out.println("MDD implicants:");
 	System.out.println(this.mddImplicants);
 	
-	// Enumerate ad print prime implicants
+	// Enumerate and print prime implicants
 	enumeratePrimeImplicants();
 	System.out.println("");
 	System.out.println("Prime implicants:");
 	System.out.println(this.primeImplicants);
+	
+	// Solve the Integer Linear Programming
+	solveILP();
 	
 	return;
     }
@@ -129,6 +137,9 @@ public class MaximalSymbolicSteadyStatesService implements Service {
     
     // Enumeration of prime implicants /////////////////////////////////////////
     
+    /**
+     * Key (c, v) for implicant (p, c, v), used to partition the MDD implicants
+     */
     private class Key {
 	private final int a;
 	private final int b;
@@ -153,15 +164,22 @@ public class MaximalSymbolicSteadyStatesService implements Service {
 	    return (this.a * 31 + this.b);
 	}	
     }
-
+    
+    /**
+     * Partition MDD implicants (p, c, v) according to (c, v)
+     *
+     * @return the collection of lists of implicants with identical (c, v)
+     */
     private Collection<List> partitionMDDImplicants() {
 	HashMap<Key, List> partition = new HashMap<Key, List>();
 	for (Implicant implicant : this.mddImplicants) {
-	    Key key = new Key(implicant.v, implicant.c);
+	    Key key = new Key(implicant.c, implicant.v);
 	    if (partition.containsKey(key)) {
+		// Key (c, v) already present in the hashtable
 		List part = partition.get(key);
 		part.add(implicant);
 	    } else {
+		// Key (c, v) not present in the hashtable
 		List part = new ArrayList();
 		part.add(implicant);
 		partition.put(key, part);
@@ -171,12 +189,16 @@ public class MaximalSymbolicSteadyStatesService implements Service {
     }
     
     /**
-     * Combine to partial state if possible or throw an exception
+     * Combine two partial state if possible or throw an exception
      *
      * For examples:
      *              01?1?10   0   1   0   1   0   1   ?
      *          and 00???1?   0   1   1   0   ?   ?   ?
      * combine into 0??1?10   0   1   ?   ?   0   1   ?
+     *
+     * @param first partial state
+     * @param second partial state
+     * @return partial state
      */
     private int[] combine(int[] p, int[] q) throws Exception {
 	int[] r = p.clone();
@@ -198,7 +220,17 @@ public class MaximalSymbolicSteadyStatesService implements Service {
 	return r;
     }
     
-    // TODO: think about a more efficient way to enumerate prime implicants from MDD implicants
+    /**
+     * Compute the prime implicants associated with a part of MDD implicants
+     *
+     * @param List of MDD implicants (p, c, v) with identical c and v
+     * @return List of prime implicants (p, c, v) with identical c and v
+     *
+     * TODO: think about a more efficient way to enumerate prime implicants from
+     *       MDD implicants, for example begin with the less symbolic state and
+     *       maintain a list for "already primal" implicants to extract them
+     *       from the quadratic loop
+     */
     private List enumeratePrimeImplicantsOfPart(List mddPart) {
 	List primePart = new ArrayList();
 	boolean flag = false;
@@ -206,8 +238,8 @@ public class MaximalSymbolicSteadyStatesService implements Service {
 	ListIterator<Implicant> iterator_1 = mddPart.listIterator();
 	while (iterator_1.hasNext()) {
 	    Implicant implicant_1 = iterator_1.next();
-	    // Declare temporary list to accumulate more primal implicant
-	    List tempPrimePart = new ArrayList();
+	    // Declare temporary set to accumulate more primal implicant
+	    Set tempPrimePart = new HashSet<Implicant>();
 	    // For each MDD implicants
 	    ListIterator<Implicant> iterator_2 = mddPart.listIterator();
 	    while (iterator_2.hasNext()) {
@@ -240,6 +272,9 @@ public class MaximalSymbolicSteadyStatesService implements Service {
 	}
     }
     
+    /**
+     * Enumerate all the prime implicants
+     */
     private void enumeratePrimeImplicants() {
 	this.primeImplicants = new ArrayList();
 	Collection<List> partition = partitionMDDImplicants();
@@ -251,4 +286,14 @@ public class MaximalSymbolicSteadyStatesService implements Service {
 	}
 	return;
     }
+    
+    
+    // Solve the Integer Linear Programming
+    private void solveILP() {
+	SolverFactory factory = new SolverFactoryLpSolve();
+	factory.setParameter(Solver.VERBOSE, 0);
+	factory.setParameter(Solver.TIMEOUT, 100);
+	return;
+    }
+    
 }
