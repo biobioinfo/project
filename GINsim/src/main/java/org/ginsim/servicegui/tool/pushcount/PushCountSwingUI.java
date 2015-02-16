@@ -13,9 +13,11 @@ import org.colomoto.logicalmodel.tools.pushcount.PushCountResult;
 import org.colomoto.logicalmodel.tools.pushcount.PushCountSearcher;
 import org.ginsim.common.application.Txt;
 import org.ginsim.commongui.dialog.ResultsDialog;
+import org.ginsim.core.graph.Graph;
 import org.ginsim.core.graph.regulatorygraph.RegulatoryGraph;
 import org.ginsim.core.graph.regulatorygraph.namedstates.NamedStateList;
 import org.ginsim.core.graph.regulatorygraph.namedstates.NamedStatesHandler;
+import org.ginsim.core.notification.NotificationManager;
 import org.ginsim.core.service.ServiceManager;
 import org.ginsim.gui.graph.regulatorygraph.initialstate.InitialStatePanel;
 import org.ginsim.gui.utils.dialog.stackdialog.LogicalModelActionDialog;
@@ -29,11 +31,13 @@ public class PushCountSwingUI extends LogicalModelActionDialog {
 	private NamedStatesHandler sourceHandler ;
 	private InitialStatePanel targetComp ;
 	private NamedStatesHandler targetHandler ;
+	private RegulatoryGraph graph ;
 	
 	private final PushCountService service = ServiceManager.getManager().getService(PushCountService.class);
 	
 	public PushCountSwingUI(RegulatoryGraph graph) {
 		super(graph, null, "PushCount", 600,600) ;
+		this.graph = graph ;
 		sourceHandler = new NamedStatesHandler(graph) ;
 		targetHandler = new NamedStatesHandler(graph) ;
 		sourceComp = new InitialStatePanel(sourceHandler, true) ;
@@ -63,6 +67,16 @@ public class PushCountSwingUI extends LogicalModelActionDialog {
 		NamedStateList source = sourceHandler.getInitialStates() ;
 		NamedStateList target = targetHandler.getInitialStates() ;
  
+		if(source.isEmpty())
+		{
+			NotificationManager.publishError(graph, "Please enter source states") ;
+			return ;
+		}
+		if(target.isEmpty())
+		{
+			NotificationManager.publishError(graph, "Please enter target states") ;
+		}
+		
 		PushCountSearcher task = service.getSearcher(model, source, target) ;
 		
 		final ResultsDialog f = new ResultsDialog(null) ;
@@ -75,9 +89,15 @@ public class PushCountSwingUI extends LogicalModelActionDialog {
 			public void taskUpdated(Task t) {
 				if(t.getStatus() != TaskStatus.FINISHED)
 				{
-					//TODO : print something bad
+					NotificationManager.publishError(graph, "Task ended with status " + t.getStatus()) ;
 				}
-				PushCountResult result = (PushCountResult) t.getResult() ; 
+				PushCountResult result = (PushCountResult) t.getResult() ;
+				if(result == null)
+				{
+					NotificationManager.publishError(graph, "Computation returned null") ;
+					return ; 
+				}
+				
 				f.setResults(result.print()) ;
 			}
 		}) ;

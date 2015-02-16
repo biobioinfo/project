@@ -14,51 +14,43 @@ import org.ginsim.core.service.Service;
 import org.ginsim.core.service.ServiceStatus;
 import org.mangosdk.spi.ProviderFor;
 
- 
+
 @ProviderFor(Service.class)
 @Alias("pushcount")
 @ServiceStatus(EStatus.RELEASED)
 public class PushCountService implements Service{
-	
+
 	public PushCountSearcher getSearcher(RegulatoryGraph g, 
 			NamedStateList source, NamedStateList target) {
 		return getSearcher(g.getModel(), source, target) ;
 	}
-	
+
 	public PushCountSearcher getSearcher(LogicalModel model, 
 			NamedStateList source, NamedStateList target){
-		if(source.size() == 0)
-		{
-			//TODO : print something bad
+		if(source.size() == 0 || target.size() == 0)
 			return null;
-		}
-		if(target.size() == 0)
-		{
-			//TODO : print something bad
-			return null; 
-		}
-		
+
 		MDDManager m = model.getMDDManager() ;
 		int[] sourceMDDs = new int[source.size()] ;
 		for(int i = 0 ; i < source.size() ; i++)
 			sourceMDDs[i] = source.get(i).getMDD(m) ;
-		
+
 		int[] targetMDDs = new int[target.size()] ;
 		for(int i = 0 ; i < target.size() ; i++)
 			targetMDDs[i] = target.get(i).getMDD(m) ;
-		
+
 		int sMDD ;
 		int tMDD ;
 		if(sourceMDDs.length == 1)
 			sMDD = sourceMDDs[0] ;
 		else 
 			sMDD = MDDBaseOperators.OR.combine(m, sourceMDDs) ;
-		
+
 		if(targetMDDs.length == 1)
 			tMDD = targetMDDs[0] ;
 		else 
 			tMDD = MDDBaseOperators.OR.combine(m, targetMDDs) ;
-		
+
 		return getSearcher(model, sMDD, tMDD ) ;
 	}
 

@@ -20,6 +20,7 @@ import org.colomoto.logicalmodel.tools.attractors.AttractorsSearcher.Algorithm;
 import org.ginsim.common.application.Txt;
 import org.ginsim.commongui.dialog.ResultsDialog;
 import org.ginsim.core.graph.regulatorygraph.RegulatoryGraph;
+import org.ginsim.core.notification.NotificationManager;
 import org.ginsim.gui.utils.dialog.stackdialog.LogicalModelActionDialog;
 import org.ginsim.service.tool.attractors.AttractorsService;
 
@@ -37,9 +38,12 @@ public class AttractorsSwingUI extends LogicalModelActionDialog {
 			new JComboBox<String>(new String[] {"synchronous", "asynchronous"}) ;
 	
 	private JPanel mainPanel = new JPanel() ;
+	
+	private RegulatoryGraph graph ;
 
 	public AttractorsSwingUI(RegulatoryGraph lrg) {
 		super(lrg, null, "Attractors", 400, 400);
+		this.graph = lrg ;
 		init() ;
 	}
 	
@@ -97,7 +101,8 @@ public class AttractorsSwingUI extends LogicalModelActionDialog {
 			public void taskUpdated(Task t) {
 				if(t.getStatus() != TaskStatus.FINISHED)
 				{
-					//TODO : print something bad
+					NotificationManager.publishError(graph, "Task ended with status " + t.getStatus()) ;
+					return ; 
 				}
 				ResultsDialog d = new ResultsDialog(null) ;
 				@SuppressWarnings("unchecked")
