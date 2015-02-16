@@ -10,6 +10,7 @@ import org.colomoto.mddlib.MDDManager;
 import org.colomoto.mddlib.MDDManagerFactory;
 import org.colomoto.mddlib.MDDVariable;
 import org.colomoto.mddlib.MDDVariableFactory;
+import org.colomoto.mddlib.internal.MDDStoreImpl;
 import org.colomoto.mddlib.operators.MDDBaseOperators;
 
 /**
@@ -35,6 +36,7 @@ public class StateTransitionGraph {
 
 	public final MDDVariable[] xVars ;
 	public final MDDVariable[] yVars ;
+	public final MDDVariable[] zVars ;
 
 	//Copy of the functions into the tempManager
 	private final int[] func ;
@@ -45,7 +47,7 @@ public class StateTransitionGraph {
 
 		MDDVariable[] vars = manager.getAllVariables() ;
 		varNum = vars.length ;
-		String[] tempVars = new String[vars.length] ;
+		String[] tempVars = new String[2*varNum] ;
 		for(int i = 0 ; i < tempVars.length ; i++)
 			tempVars[i] = "temp " + i ;
 
@@ -55,10 +57,12 @@ public class StateTransitionGraph {
 			allVars.add(vars[i], vars[i].nbval) ;
 		for(int i = 0 ; i < vars.length ; i++)
 			allVars.add(tempVars[i], vars[i].nbval) ;
-
+		for(int i = 0 ; i < vars.length ; i++)
+			allVars.add(tempVars[i+varNum], vars[i].nbval) ;
+		
 		tempManager = MDDManagerFactory.getManager(allVars, manager.getLeafCount()) ;
 
-		for(int i = 0 ; i < 2* varNum ; i ++)
+		for(int i = 0 ; i < 3* varNum ; i ++)
 			varList.add(tempManager.getVariableForKey(allVars.get(i))) ;
 
 		int[] func0 = model.getLogicalFunctions() ;
@@ -72,6 +76,7 @@ public class StateTransitionGraph {
 		}
 		xVars = varList.subList(0, varNum).toArray(new MDDVariable[0]) ;
 		yVars = varList.subList(varNum, 2*varNum).toArray(new MDDVariable[0]) ;
+		zVars = varList.subList(2*varNum, 3*varNum).toArray(new MDDVariable[0]) ;
 	}
 
 
@@ -87,7 +92,7 @@ public class StateTransitionGraph {
 	 * @param var
 	 * @return
 	 */
-	int getVariableValue(MDDVariable var){
+	public int getVariableValue(MDDVariable var){
 		int[] values = new int[var.nbval] ;
 		for(int i = 0 ; i < var.nbval ; i++)
 		{
@@ -108,7 +113,7 @@ public class StateTransitionGraph {
 	 */
 	public int pathDist(int f, byte[] source, byte[] target) {
 		assert(target.length == varNum) ;
-		byte[] target1 = new byte[2*varNum] ;
+		byte[] target1 = new byte[3*varNum] ;
 		for(int i = 0 ; i < varNum ; i++)
 		{
 			target1[i] = target[i] ;
@@ -128,7 +133,8 @@ public class StateTransitionGraph {
 	/**
 	 * An MDD representing the transition function. The resulting function takes two 
 	 * bit-string arguments x and y, and returns 1 if there is a transition from x to y, 
-	 * and 0 otherwise
+	 * and 0 otherwise. The variables used by this mdd are xVars and yVars to represent x
+	 * and y respectively.
 	 * @return
 	 */
 	public int getSynchronousTransitionFunction(){
@@ -162,7 +168,7 @@ public class StateTransitionGraph {
 	/**
 	 * An MDD representing the transition function. The resulting function takes two 
 	 * bit-string arguments x and y, and returns 1 if there is a transition from x to y, 
-	 * and 0 otherwise
+	 * and 0 otherwise. The variables xVars and yVars are used for x and y respectively
 	 * @return
 	 */
 	public int getAsynchronousTransitionFunction(){
@@ -290,11 +296,12 @@ public class StateTransitionGraph {
 	 * @return
 	 */
 	public int getMddForState(byte[] state){
-		byte[] completeState = new byte[2*varNum] ;
+		byte[] completeState = new byte[3*varNum] ;
 		System.arraycopy(state, 0, completeState, 0, state.length) ;
 
 		int mdd = tempManager.nodeFromState(completeState, 1) ;
 		mdd = MDDQuantifier.QUANTIFY_MAX.combine(tempManager, yVars, mdd) ;
+		mdd = MDDQuantifier.QUANTIFY_MAX.combine(tempManager, zVars, mdd) ;
 		return mdd ;
 	}
 
@@ -307,7 +314,7 @@ public class StateTransitionGraph {
 		if(state.length != varNum)
 			throw new IllegalArgumentException("Wrong length for the input state : " 
 					+ state.length + " expected : " + varNum ) ;
-		byte[] state2 = new byte[2*varNum] ;
+		byte[] state2 = new byte[3*varNum] ;
 		System.arraycopy(state, 0, state2, 0, varNum) ;
 		byte[] res = new byte[varNum] ;
 		for(int i = 0 ; i < varNum ; i++)
@@ -329,7 +336,7 @@ public class StateTransitionGraph {
 	/**
 	 * Returns a state inside the input set of states. 
 	 * When the mdd is evaluated with this states, we obtain a non zero value
-	 * if stateSet has no satisfying assignment, throws an illegalArgument exception
+	 * if stateSet has no satisfying assignment, throws an illegalArgument exception.
 	 * @param stateSet
 	 * @return
 	 */

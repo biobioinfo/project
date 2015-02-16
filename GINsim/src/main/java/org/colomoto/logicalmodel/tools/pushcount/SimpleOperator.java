@@ -9,6 +9,7 @@ import org.colomoto.mddlib.MDDOperator;
 import org.colomoto.mddlib.MDDVariable;
 import org.colomoto.mddlib.NodeRelation;
 import org.colomoto.mddlib.operators.AbstractOperator;
+import org.colomoto.mddlib.operators.MDDBaseOperators;
 
 /**
  * Simple utility class for building operators on MDDs. To build a new operator, you must 
@@ -153,9 +154,11 @@ public class SimpleOperator extends AbstractOperator {
 			int[] newChildren = new int[children.length] ;
 			for(int i = 0 ; i < children.length ; i++)
 			{
+				int mdd2 = sub.get(startIndex).newVar.getSimpleNode(0, 1, i, i) ;
 				newChildren[i] = doSubstitute(m, sub, children[i], startIndex +1) ;
+				newChildren[i] = MDDBaseOperators.AND.combine(m, newChildren[i], mdd2) ;
 			}
-			return sub.get(startIndex).newVar.getNodeFree(newChildren) ;
+			return MDDBaseOperators.OR.combine(m, newChildren) ;
 		}
 		else
 		{
@@ -167,9 +170,11 @@ public class SimpleOperator extends AbstractOperator {
 				int[] newChildren = new int[children.length] ;
 				for(int i = 0 ; i < children.length ; i++)
 				{
+					int mdd2 = m.getNodeVariable(mdd).getSimpleNode(0, 1, i, i) ;
 					newChildren[i] = doSubstitute(m, sub, children[i], startIndex) ;
+					newChildren[i] = MDDBaseOperators.AND.combine(m, newChildren[i], mdd2) ;
 				}
-				return m.getNodeVariable(mdd).getNode(newChildren) ;
+				return MDDBaseOperators.OR.combine(m, newChildren) ;
 			}
 		}
 	}

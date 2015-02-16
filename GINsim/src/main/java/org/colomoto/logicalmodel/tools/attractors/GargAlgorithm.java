@@ -8,6 +8,12 @@ import org.colomoto.logicalmodel.tools.pushcount.AssignmentsEnum;
 import org.colomoto.logicalmodel.tools.pushcount.StateTransitionGraph;
 import org.colomoto.mddlib.operators.MDDBaseOperators;
 
+/**
+ * Implementation of Garg et al. algorithm to compute attractors in a model.
+ * Reference : http://link.springer.com/chapter/10.1007%2F978-3-540-71681-5_5
+ * @author heinrich
+ *
+ */
 public class GargAlgorithm {
 	
 	private final StateTransitionGraph trGraph ;
@@ -115,11 +121,11 @@ public class GargAlgorithm {
 	}
 	
 	/**
-	 * Returns a list of all the states in the mdd
+	 * Utility : Returns a list of all the states in the mdd
 	 * @param mdd
 	 * @return
 	 */
-	public List<byte[]> enumStates(int mdd) {
+	protected List<byte[]> enumStates(int mdd) {
 		Iterator<byte[]> it = AssignmentsEnum.getAssignments(trGraph.getManager(), mdd, trGraph.xVars) ;
 		List<byte[]> l = new LinkedList<byte[]>() ;
 		while(it.hasNext())
