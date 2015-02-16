@@ -22,7 +22,6 @@ public class PushCountSearcher extends AbstractTask<PushCountResult> {
 
 	public PushCountSearcher(LogicalModel model, int source, int target) throws ParseException {
 		this.model = model ;
-		MDDManager manager = model.getMDDManager() ;
 		
 		trGraph = new StateTransitionGraph(model) ;
 		
@@ -33,22 +32,14 @@ public class PushCountSearcher extends AbstractTask<PushCountResult> {
 
 	@Override
 	protected PushCountResult doGetResult() throws Exception {
-		System.out.println("Running") ;
 		Iterator<byte[]> iter0 = AssignmentsEnum.getAssignments(model.getMDDManager(), target) ;
 		int f = trGraph.getAsynchronousTransitionFunction() ;
-		System.out.println("From :=") ;
-		Iterator<byte[]> iter2 = AssignmentsEnum.getAssignments(model.getMDDManager(), source) ;
-		while(iter2.hasNext())
-			printState(iter2.next()) ;
-		System.out.println();
 		
 		PushCountResult result = new PushCountResult() ;
 		
 		while(iter0.hasNext())
 		{
 			byte[] target = iter0.next();
-			//System.out.println("To go to ") ;
-			//printState(target) ;
 			int statemdd = model.getMDDManager().nodeFromState(target, 1) ;
 			statemdd = trGraph.getManager().parseDump(model.getMDDManager().dumpMDD(statemdd)) ;
 			
@@ -59,10 +50,6 @@ public class PushCountSearcher extends AbstractTask<PushCountResult> {
 					br, target) ;
 			result.pushAncestor.put(target, closestPred) ;
 			result.push.put(target, dist(model.getMDDManager(), source, closestPred)) ;
-			//System.out.println("go up to the state") ;
-			//printState(closestPred) ;
-			//System.out.println("with a push of " + dist(model.getMDDManager(), source, closestPred)) ;
-			//System.out.println("-------------") ;
 		}
 		return result ;
 	}

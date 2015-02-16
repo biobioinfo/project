@@ -10,7 +10,6 @@ import org.colomoto.mddlib.MDDManager;
 import org.colomoto.mddlib.MDDManagerFactory;
 import org.colomoto.mddlib.MDDVariable;
 import org.colomoto.mddlib.MDDVariableFactory;
-import org.colomoto.mddlib.internal.MDDStoreImpl;
 import org.colomoto.mddlib.operators.MDDBaseOperators;
 
 /**
@@ -113,14 +112,15 @@ public class StateTransitionGraph {
 	 */
 	public int pathDist(int f, byte[] source, byte[] target) {
 		assert(target.length == varNum) ;
-		byte[] target1 = new byte[3*varNum] ;
+		/*byte[] target1 = new byte[3*varNum] ;
 		for(int i = 0 ; i < varNum ; i++)
 		{
 			target1[i] = target[i] ;
-		}
+		}*/
 
-		int mdd = tempManager.nodeFromState(target1, 1) ;
-		mdd = AbstractQuantifier.QUANTIFY_MAX.combine(tempManager, yVars, mdd) ;
+		//int mdd = tempManager.nodeFromState(target1, 1) ;
+		int mdd = getMddForState(target) ;
+		//mdd = AbstractQuantifier.QUANTIFY_MAX.combine(tempManager, yVars, mdd) ;
 		//mdd evaluates to 1 only on target and does not depend on y.
 		//See, maybe I need to expand source too....
 		while(tempManager.reach(mdd, source) == 0)
