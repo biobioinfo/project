@@ -79,17 +79,13 @@ public class PushCountSwingUI extends LogicalModelActionDialog {
 		
 		PushCountSearcher task = service.getSearcher(model, source, target) ;
 		
-		final ResultsDialog f = new ResultsDialog(null) ;
-		//f.setSize(600, 600) ;
-		//f.setDefaultCloseOperation(DISPOSE_ON_CLOSE) ;
-		//f.setVisible(true) ;
-		
 		task.background(new TaskListener() {
 			@Override
 			public void taskUpdated(Task t) {
 				if(t.getStatus() != TaskStatus.FINISHED)
 				{
 					NotificationManager.publishError(graph, "Task ended with status " + t.getStatus()) ;
+					return ; 
 				}
 				PushCountResult result = (PushCountResult) t.getResult() ;
 				if(result == null)
@@ -97,7 +93,7 @@ public class PushCountSwingUI extends LogicalModelActionDialog {
 					NotificationManager.publishError(graph, "Computation returned null") ;
 					return ; 
 				}
-				
+				ResultsDialog f = new ResultsDialog(null) ;
 				f.setResults(result.print()) ;
 			}
 		}) ;
