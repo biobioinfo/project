@@ -50,9 +50,17 @@ Try the implementation with other regulatory networks.
 
 ##Usage
 
+Before anything else download the [!oj Algorithms](http://ojalgo.org). You
+should get a compressed archive `ojalgo-x.x.tar.gz`. Extract its content and
+check if `ojalgo-x.x.jar` is present.
+
+To install ojAlgo in the local repositories of Maven use the following command:
+`mvn install:install-file -Dfile=ojalgo-x.x.jar -DgroupId=org -DartifactId=ojalgo -Dversion=x.x -Dpackaging=jar`
+with `x.x` replaced by the appropriate version. Before running this command you
+may have to change the current working directory.
+
 The `script.sh` files copies the java files at the correct location. Before running it, you must either 
 set the `GINSIM` variable to the project folder of GINsim or give the path to this folder as an argument
 to the script.
 
 Once this is done, GINsim must be recompiled to integrate the changes.
-

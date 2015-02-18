@@ -2,88 +2,160 @@
 
 \usepackage[utf8]{inputenc}    % Pour que LaTeX comprenne les accents.
 \usepackage{times}             % Police de caractères
-\usepackage[english]{babel}     % Traitement du texte adapté aux règles typographiques
+\usepackage[english]{babel}    % Traitement du texte adapté aux règles typographiques
                                % de la langue donnée en option (e.g., pour l'espacement
                                % après les ponctuations
 \usepackage[T1]{fontenc}
-\usepackage{amsmath, amsthm, amssymb} 
-\usepackage{dsfont}  % pour les indicatrices 
-\usepackage{graphicx} 
-\usepackage{textcomp}  
-\usepackage{enumerate}     
-\usepackage{authblk}                     
-\sloppy              % Ne pas faire déborder les lignes dans la marge
+\usepackage{amsmath, amsthm, amssymb}
+\usepackage{dsfont}            % Pour les indicatrices
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{enumerate}
+\usepackage{authblk}
+\usepackage[colorlinks=true, citecolor=blue, urlcolor=magenta]{hyperref}
+                               % Pour créer des hyperliens
+\sloppy                        % Ne pas faire déborder les lignes dans la marge
 
 
-\author{Marc Heinrich, Baptiste Lefebvre}
-\title{Boolean model for the network of the blood stem cell}
+\author{Marc Heinrich \hspace{20mm} Baptiste Lefebvre}
+\title{MPRI 2.19 - Programming project \\ Boolean model for the network controlling \\ the blood stem cells}
+\date{February 17, 2015}
 
 
 \begin{document}
 \maketitle
 
 \section{Goal}
-%Study one particular model, experiment on it. 
-%Several different things were looked at
 
-% Mechanical Reproduction of the experiement (compute the smallest perturbation to reach a given state)
+% Study one particular model, experiment on it. 
+% Several different things were looked at
 
-% Computation of attractors : two different methods. One relying on MDDs, implementing the algorithm from Garg et Al.
-%An other that use prime implicants and Integer linear programming to find the attractors.
+% Mechanical Reproduction of the experiement (compute the smallest perturbation
+% to reach a given state)
 
-The goal of this project was to study a perticular model described in [ref]. %TODO
-The work we have done spreads in two different directions. The first one is to try to reproduce the experiment that is described on the article, to compute the smallest perturbation needed to reach a given state. 
-The second direction is the computation of the attractors of a model. Several different algorithms are already knwon for this problem, and we implemented two of them, and integrated them into GINsim. The first algorithm relies on Multivalued Decision Diagrams (MDDs). The second one [TODO : bapt]
+% Computation of attractors : two different methods. One relying on MDDs,
+% implementing the algorithm from Garg et Al.
+% An other that use prime implicants and Integer linear programming to find the attractors.
 
+The goal of this project was to study a particular model described in
+\cite{Bonzanni}. The work we have done spreads in two different directions. The
+first one is to try to reproduce the experiment that is described on the
+article, to compute the \emph{smallest perturbation} needed to reach a given
+state. The second direction is the computation of the \emph{attractors} of a
+model. Several different algorithms are already known for this problem. We
+implemented two of them and integrated them into GINsim. The first algorithm
+relies on \emph{Multivalued Decision Diagrams} (MDDs). The second one on
+\emph{prime implicants} and \emph{(0-1) linear programming} to compute the
+\emph{symbolic steady states} of a given boolean network.
 
-The code can be found on Github at https://github.com/biobioinfo/project.
+Our code can be found on GitHub at
+\href{https://github.com/biobioinfo/project}{https://github.com/biobioinfo/project}.
 
 \section{What was done}
 
-% Our contribution is an integration into GINsim of several functionnalities to solve the problems mentionned above.
+% Our contribution is an integration into GINsim of several functionnalities to
+% solve the problems mentionned above.
 % They were added using the plugin mechanism. 
 
-
 % Compute the smallest perturbation
-% Very simple method : compute the set of states that are backward reachable from one state, ennumerate them, and keep the closest to the source.
+% Very simple method : compute the set of states that are backward reachable
+% from one state, ennumerate them, and keep the closest to the source.
 
-% Computing attractors using MDDs. The algorithm that we used is described in garg et Al. 
-% Note that an important part of the implementation was not the algorithm itself, but some simple operations on Mdds that were not already present into MDDlib.
-% Big problem understanding the implementation, and extending it four our purposes.
-% Gives results for regulatory graphs of up to 20 nodes in the synchronous case (max 10 asynchronous). 
-
-
+% Computing attractors using MDDs. The algorithm that we used is described in
+% garg et Al. 
+% Note that an important part of the implementation was not the algorithm
+% itself, but some simple operations on Mdds that were not already present into
+% MDDlib.
+% Big problem understanding the implementation, and extending it four our
+% purposes.
+% Gives results for regulatory graphs of up to 20 nodes in the synchronous case
+% (max 10 asynchronous). 
 
 % ILP based solution ... ? see
 
-Our contribution is an integration into GINsim of several functionnalities to solve the problems mentionned above. These functionnalities were added using GINsim's plugin mechanism which should make it relatively easy to integrate. 
+Our contribution is an integration into GINsim of several functionnalities to
+solve the problems mentionned above. These functionnalities were added using
+\emph{GINsim's plugin mechanism} which should make it relatively easy to
+integrate.
 
 \subsection{Compunting minimal perturbation}
-To compute the minimal perturbation needed to reach a given state, we used a relatively naïve approch. It consists in, given the target state compute all the states that are 'backward reachable', that is that we can reach by taking transitions in the reverse from this state, and then ennumerate them all to find the closest one from the source. One of the problems of this method is that it may ennumerate a large number of states (eventually the whole state space) if the target state happens to have many ancestors. We tested this plugin on a 11 node regulatory graph (from [ref]) %TODO
-and it manages to find the smallest perturbation in less than 20 seconds.
+To compute the minimal perturbation needed to reach a given state, we used a
+relatively naive approach. It consists in: given the target state compute all
+the states that are \emph{backward reachable}, that is the states we can reach
+by taking transitions in the reverse from the target state, and then enumerate
+them all to find the closest one from the source. One of the problems of this
+method is that it may enumerate a large number of states (eventually the whole
+state space) if the target state happens to have many ancestors. We tested this
+plugin on a 11 node regulatory graph (from \cite{Bonzanni}) and it manages to
+find the smallest perturbation in less than 20 seconds.
 
-\subsection{MDD approach for computing attractors}
-As we said before, we also implemented the algorithm from Garg et Al [ ref]. %TODO 
-We also provided an implementation of the algorithm from Zheng et Al [ref]. %TODO 
-The major difficulty that we encountered on this part, was on the manipulation of MDDs. The algorithm itself is relatively simple, however it requires to be able to already do some relatively basic operations on the MDDs we manipulate. So we had to implement some of these (for example : variable substitution, quantification over variables, or other binary operators like equality, addition...). In general these operation were implemented using naïve approach and are probably the main issue in the time complexity. We were able to test the algorithm on several models from GINsim model repository. On average, we were able to compute the attractors for synchronous transitions on models of up to 20 nodes in less than 10 seconds. On larger models, the computation seemed to take really more time (more than several minutes). For the asynchronous case, the performance are much worse, and it doesn't manage to find the attractors in reasonnable time for models of mode than a dozen of nodes.
+\subsection{MDD approach to compute attractors}
+As we said before, we also implemented the algorithms from \cite{Garg} and
+\cite{Zheng}. The major difficulty that we encountered on this part, was on the
+manipulation of MDDs. The algorithm itself is relatively simple, however it
+requires to be able to already do some relatively basic operations on the MDDs
+we manipulate. So we had to implement some of these (for example : variable
+substitution, quantification over variables, or other binary operators like
+equality, addition...). In general these operation were implemented using naive
+approach and are probably the main issue in the time complexity. We were able to
+test the algorithm on several models from GINsim model repository. On average,
+we were able to compute the attractors for synchronous transitions on models of
+up to 20 nodes in less than 10 seconds. On larger models, the computation seemed
+to take really more time (more than several minutes). For the asynchronous case,
+the performance are much worse, and it doesn't manage to find the attractors in
+reasonnable time for models of more than a dozen of nodes.
 
-\subsection*{ILP based [bapt]} %TODO
+\subsection{(0-1)LP approach to compute symbolic steady states}
+Finaly we have also implemented the algorithm from \cite{Klarner}. Our
+motivation was to push the limits of size (i.e. node numbers) to compute
+attractors without enumerating the whole state space but by working directly on
+the boolean regulatory network. The idea is to enumerate all the prime
+implicants of a boolean regulatory network, which means for each update function
+of a gene to enumerate the configurations where a minimum number of valued
+inputs lead to a valued output. This part was implemented by the extraction of
+some implicants from the MDD representations of the update functions followed by
+an iterative filtering process to reach the prime implicants. Then we formulate
+the (0-1) problem described in \cite{Klarner} using \emph{!oj Algorithms}
+(or \emph{ojAlgo}, see \href{http://ojalgo.org}{http://ojalgo.org}) which is the
+one and only free, open source and pure java code offering a (0-1) solver we
+were able to found. We were able to test a non-final version of the algorithm on
+models of about ten nodes without significant time effect. More extensive
+testing will be presented during the oral presentation.
 
 
-\section{Improvements}
-%Compute perturbation : 
+\section{Possible improvements}
+% Compute perturbation :
 % If you only want the distance, you should be able to 
 % express the problem entirely in terms of Mdds, and avoid the (costly ennumeration part)
 % Comutation of attractors : a lot of naïve implementation that could be improved to speed up the process
 % Use of lazy evaluation on the mdds to reduce the memory requirements?
 
-From what we have done, several improvements can be made. First for the problem of computing the minimum perturbation, it should be possible to solve the problem using only MDDs. This would have the advantage of not ennumerating the possibly many states as in our current version. However, we would only get this way the number of genes that must be modified, and not which one. 
-For the MDD approach to compute attractors, the main solution to speed up the process would probably be to implement base operations for MDDs more carefully. 
-One idea could be to use the observation that states that don't have any antecendants are necessarily transients. Since it should be possible to check this property using MDDs, it should possible to reduce a great part of the state space (actually all the transient states in the synchronous case).
+From what we have done, several improvements can be made. First, for the problem
+of computing the minimum perturbation, it should be possible to solve the
+problem using only MDDs. This would have the advantage of not enumerating the
+possibly many states as in our current version. However, we would only get this
+way the number of genes that must be modified, and not which one.
+For the MDD approach to compute attractors, the main solution to speed up the
+process would probably be to implement base operations for MDDs more carefully.
+One idea could be to use the observation that states that do not have any
+antecendents are necessarily transients. Since it should be possible to check
+this property using MDDs, it should be possible to reduce a great part of the
+state space (actually all the transient states in the synchronous case).
+Finally for the (0-1) linear programming approach, a similar solution to speed
+up the process might be to replace the oj! Algorithms by a dedicated (0-1)
+solver which takes advantage of the restricted maximal in-degree and its
+implications on the (0-1) problem to use the appropriate heuristic. A simplier
+way of enhancement is to optimize the part of the algorithm which enumerate the
+prime implicant, in fact this algorithm works on a list of hypothetical prime
+implicants which are compared in pairs several times but it could reduce this
+list by removing progressively the elements which are certainly prime
+implicants.
 
 
+% Bibliography
+
+\bibliographystyle{apalike}
+% Style among : abbrv, acm, alpha, apalike, ieeetr, plain, siam and unsrt.
 \bibliography{bib.bib}
-
-%TODO : lots of stuff here 
 
 \end{document}

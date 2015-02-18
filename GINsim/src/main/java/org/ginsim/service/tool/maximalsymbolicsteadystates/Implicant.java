@@ -8,11 +8,13 @@ public class Implicant {
     public final int[] p;
     public final int c;
     public final int v;
+    public int index;
     
     public Implicant(int[] p, int c, int v) {
 	this.p = p;
 	this.c = c;
 	this.v = v;
+	this.index = 0;
     }
     
     public String toString() {

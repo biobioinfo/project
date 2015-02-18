@@ -13,3 +13,11 @@ hs_err_pid*
 
 # Emacs backup files #
 *~
+
+# LaTeX files #
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.pdf

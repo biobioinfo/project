@@ -18,9 +18,12 @@ import org.ginsim.core.graph.regulatorygraph.RegulatoryGraph;
 import org.colomoto.logicalmodel.LogicalModel;
 import org.colomoto.mddlib.MDDManager;
 import org.colomoto.mddlib.MDDVariable;
-import net.sf.javailp.SolverFactory;
-import net.sf.javailp.SolverFactoryLpSolve;
-import net.sf.javailp.Solver;
+import org.ojalgo.optimisation.Variable;
+import org.ojalgo.optimisation.ExpressionsBasedModel;
+import org.ojalgo.optimisation.Expression;
+import org.ojalgo.optimisation.Optimisation;
+import org.ojalgo.netio.BasicLogger;
+
 
 
 @ProviderFor(Service.class)
@@ -39,35 +42,6 @@ public class MaximalSymbolicSteadyStatesService implements Service {
 	return;
     }
     
-    // public void test() {
-    // 	MDDManager mddManager = logicalModel.getMDDManager();
-    // 	int[] logicalFunctions = logicalModel.getLogicalFunctions();
-	
-    // 	// Print MDD manager ///////////////////////////////////////////////////
-    // 	System.out.println("");
-    // 	System.out.println("MDDManager");
-    // 	int node = 0;
-    // 	String representation = mddManager.dumpMDD(node);
-    // 	System.out.println(representation);
-	
-    // 	// Print logical functions /////////////////////////////////////////////
-    // 	System.out.println("LogicalFunctions");
-    // 	for (int i = 0; i < logicalFunctions.length; i++) {
-    // 	    node = logicalFunctions[i];
-    // 	    //System.out.println(node);
-    // 	    representation = mddManager.dumpMDD(node);
-    // 	    System.out.println(representation);
-    // 	}
-	
-    // 	// Print MDD variables /////////////////////////////////////////////////
-    // 	System.out.println("MDDVariables");
-    // 	MDDVariable[] mddVariables = mddManager.getAllVariables();
-    // 	for (int i = 0; i < mddVariables.length; i++) {
-    // 	    System.out.println(mddVariables[i].toString());
-    // 	    //System.out.println(mddManager.getVariableIndex(mddVariables[i]));
-    // 	}
-    // }
-    
     public void run() {	
 	// Enumerate and print MDD implicants
 	enumerateMDDImplicants();
@@ -82,6 +56,7 @@ public class MaximalSymbolicSteadyStatesService implements Service {
 	System.out.println(this.primeImplicants);
 	
 	// Solve the Integer Linear Programming
+	System.out.println("");
 	solveILP();
 	
 	return;
@@ -166,13 +141,13 @@ public class MaximalSymbolicSteadyStatesService implements Service {
     }
     
     /**
-     * Partition MDD implicants (p, c, v) according to (c, v)
+     * Partition implicants (p, c, v) according to (c, v)
      *
      * @return the collection of lists of implicants with identical (c, v)
      */
-    private Collection<List> partitionMDDImplicants() {
+    private Collection<List> partitionImplicants(List<Implicant> implicants) {
 	HashMap<Key, List> partition = new HashMap<Key, List>();
-	for (Implicant implicant : this.mddImplicants) {
+	for (Implicant implicant : implicants) {
 	    Key key = new Key(implicant.c, implicant.v);
 	    if (partition.containsKey(key)) {
 		// Key (c, v) already present in the hashtable
@@ -277,7 +252,7 @@ public class MaximalSymbolicSteadyStatesService implements Service {
      */
     private void enumeratePrimeImplicants() {
 	this.primeImplicants = new ArrayList();
-	Collection<List> partition = partitionMDDImplicants();
+	Collection<List> partition = partitionImplicants(this.mddImplicants);
 	Iterator<List> iterator = partition.iterator();
 	while (iterator.hasNext()) {
 	    List mddPart = iterator.next();
@@ -290,9 +265,110 @@ public class MaximalSymbolicSteadyStatesService implements Service {
     
     // Solve the Integer Linear Programming
     private void solveILP() {
-	SolverFactory factory = new SolverFactoryLpSolve();
-	factory.setParameter(Solver.VERBOSE, 0);
-	factory.setParameter(Solver.TIMEOUT, 100);
+	
+	// Create variables x_a in {0, 1} for every arc a = (p, c, v)
+	List<Variable> x = new ArrayList<Variable>();
+	for (int a = 0; a < this.primeImplicants.size(); a++) {
+	    // Create variable x
+	    Variable x_a = Variable.make("x_" + a);
+	    x_a.lower(0);
+	    x_a.upper(1);
+	    x_a.weight(1);
+	    // Require an integer valued solution
+	    x_a.integer(true);
+	    // Add variable x to list
+	    x.add(x_a);
+	}
+	// Create variables y0_i in {0, 1] for every variable v_i
+	List<Variable> y0 = new ArrayList<Variable>();
+	for (int i = 0; i < numberOfGenes(); i++) {
+	    // Create variable y0
+	    Variable y0_i = Variable.make("y0_" + i);
+	    y0_i.lower(0);
+	    y0_i.upper(1);
+	    y0_i.weight(0);
+	    // Require an integer valued solution
+	    y0_i.integer(true);
+	    // Add variable y0 to list
+	    y0.add(y0_i);
+	}
+	// Create variables y1_i in {0, 1} for every variable v_i
+	List<Variable> y1 = new ArrayList<Variable>();
+	for (int i = 0; i < numberOfGenes(); i++) {
+	    // Create variable y1
+	    Variable y1_i = Variable.make("y1_" + i);
+	    y1_i.lower(0);
+	    y1_i.upper(1);
+	    y1_i.weight(0);
+	    // Require an integer valued solution
+	    y1_i.integer(true);
+	    // Add variables y_1 to list
+	    y1.add(y1_i);
+	}
+	
+	// Create a model and add variables to it
+	ExpressionsBasedModel model = new ExpressionsBasedModel();
+	ListIterator<Variable> iterator = x.listIterator();
+	while (iterator.hasNext()) {
+	    Variable variable = iterator.next();
+	    model.addVariable(variable);
+	}
+	iterator = y0.listIterator();
+	while (iterator.hasNext()) {
+	    Variable variable = iterator.next();
+	    model.addVariable(variable);
+	}
+	iterator = y1.listIterator();
+	while (iterator.hasNext()) {
+	    Variable variable = iterator.next();
+	    model.addVariable(variable);
+	}
+	
+	/**
+	// Create constraints  C1: for all c and v_i, yc_i = (Or_{a in Bc_i} x_a)
+	// (i.e. | for all a in Bc_i, x_a <= yc_i   )
+	// (     | 0 <= (Sum_{a in Bc_i} x_a) - yc_i)
+	Collection<List> partition = partitionImplicants(this.primeImplicants);
+	Iterator<List> partIterator = partition.iterator();
+	while (partIterator.hasNext()) {
+	    List part = partIterator.next();
+	    ListIterator<Implicant> iterator = part.listIterator();
+	    while (iterator.hasNext()) {
+		Implicant implicant = iterator.next();
+		Expression expression = model.addExpression("C1_" + implicant.c + "," + implicant.v);
+		expression.upper(0);
+		
+	    }
+	}
+	*/
+	
+	// Create constraints  C2: for all i, not(y0_i) or not(y1_i)
+	// (i.e. y0_i + y1_i <= 1)
+	for (int i = 0; i < numberOfGenes(); i++) {
+	    Expression expression = model.addExpression("C2_" + i);
+	    expression.upper(1);
+	    Variable y0_i = y0.get(i);
+	    Variable y1_i = y1.get(i);
+	    expression.setLinearFactor(y0_i, 1);
+	    expression.setLinearFactor(y1_i, 1);
+	}
+	
+	// Create constraints C3
+	// TODO: paste corresponding code
+	
+	// Solve the problem (i.e. maximise the cost)
+	Optimisation.Result result = model.maximise();
+	
+	// Create constraints C4
+	// TODO: paste corresponding code
+	
+	// Print the result and the model
+	BasicLogger.debug();
+	BasicLogger.debug(model);
+	BasicLogger.debug();
+	BasicLogger.debug(result);
+	BasicLogger.debug();
+		
 	return;
     }
     
