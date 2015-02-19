@@ -18,12 +18,15 @@
 
 
 \author{Marc Heinrich \hspace{20mm} Baptiste Lefebvre}
-\title{MPRI 2.19 - Programming project \\ Boolean model for the network controlling \\ the blood stem cells}
+\title{MPRI 2.19 - Programming project \\ Analysis of cyclic attractors for \\ asynchronous boolean models of cellular networks}
 \date{February 17, 2015}
 
 
+
 \begin{document}
+
 \maketitle
+
 
 \section{Goal}
 
@@ -37,19 +40,22 @@
 % implementing the algorithm from Garg et Al.
 % An other that use prime implicants and Integer linear programming to find the attractors.
 
-The goal of this project was to study a particular model described in
-\cite{Bonzanni}. The work we have done spreads in two different directions. The
-first one is to try to reproduce the experiment that is described on the
-article, to compute the \emph{smallest perturbation} needed to reach a given
-state. The second direction is the computation of the \emph{attractors} of a
-model. Several different algorithms are already known for this problem. We
-implemented two of them and integrated them into GINsim. The first algorithm
-relies on \emph{Multivalued Decision Diagrams} (MDDs). The second one on
-\emph{prime implicants} and \emph{(0-1) linear programming} to compute the
-\emph{symbolic steady states} of a given boolean network.
+The goal of this project is to tackle the problem of the identification of
+cyclic attractors for asynchronous boolean models of cellular networks, and to
+characterize their robustness. In this respect, we used the model published by
+\cite{Bonzanni} as a test case. The work we have done spreads in two different
+directions. The first one is to try to reproduce the experiment that is
+described on the article, to compute the \emph{smallest perturbation} needed to
+reach a given state. The second direction is the computation of the
+\emph{attractors} of a model. Several different algorithms are already known for
+this problem. We implemented two of them and integrated them into GINsim. The
+first algorithm relies on \emph{Multivalued Decision Diagrams} (MDDs). The
+second one on \emph{prime implicants} and \emph{(0-1) linear programming} to
+compute the \emph{symbolic steady states} of a given boolean network.
 
 Our code can be found on GitHub at
 \href{https://github.com/biobioinfo/project}{https://github.com/biobioinfo/project}.
+
 
 \section{What was done}
 
@@ -96,14 +102,14 @@ manipulation of MDDs. The algorithm itself is relatively simple, however it
 requires to be able to already do some relatively basic operations on the MDDs
 we manipulate. So we had to implement some of these (for example : variable
 substitution, quantification over variables, or other binary operators like
-equality, addition...). In general these operation were implemented using naive
-approach and are probably the main issue in the time complexity. We were able to
-test the algorithm on several models from GINsim model repository. On average,
-we were able to compute the attractors for synchronous transitions on models of
-up to 20 nodes in less than 10 seconds. On larger models, the computation seemed
-to take really more time (more than several minutes). For the asynchronous case,
-the performance are much worse, and it doesn't manage to find the attractors in
-reasonnable time for models of more than a dozen of nodes.
+equality, addition...). In general these operations were implemented using a
+naive approach and are probably the main issue in the time complexity. We were
+able to test the algorithm on several models from GINsim model repository. On
+average, we were able to compute the attractors for synchronous transitions on
+models of up to 20 nodes in less than 10 seconds. On larger models, the
+computation seemed to take really more time (more than several minutes). For the
+asynchronous case, the performance are much worse, and it doesn't manage to find
+the attractors in reasonnable time for models of more than a dozen of nodes.
 
 \subsection{(0-1)LP approach to compute symbolic steady states}
 Finaly we have also implemented the algorithm from \cite{Klarner}. Our
@@ -118,9 +124,13 @@ an iterative filtering process to reach the prime implicants. Then we formulate
 the (0-1) problem described in \cite{Klarner} using \emph{!oj Algorithms}
 (or \emph{ojAlgo}, see \href{http://ojalgo.org}{http://ojalgo.org}) which is the
 one and only free, open source and pure java code offering a (0-1) solver we
-were able to found. We were able to test a non-final version of the algorithm on
-models of about ten nodes without significant time effect. More extensive
-testing will be presented during the oral presentation.
+were able to found. This (0-1) problem is simply the optimization-based approach
+which allow the efficient computation of maximal symbolic steady states. In other
+words, the constraints which select the set of updates which are consistent
+(corresponding update functions agree on the input values) and stable (output
+values equals input values, when defined). We were able to test a non-final
+version of the algorithm on models of about ten nodes without significant time
+effect. More extensive testing will be presented during the oral presentation.
 
 
 \section{Possible improvements}
@@ -137,6 +147,7 @@ possibly many states as in our current version. However, we would only get this
 way the number of genes that must be modified, and not which one.
 For the MDD approach to compute attractors, the main solution to speed up the
 process would probably be to implement base operations for MDDs more carefully.
+% TODO: modify the relatively incomprehensible term ``base operations''
 One idea could be to use the observation that states that do not have any
 antecendents are necessarily transients. Since it should be possible to check
 this property using MDDs, it should be possible to reduce a great part of the
@@ -149,13 +160,15 @@ way of enhancement is to optimize the part of the algorithm which enumerate the
 prime implicant, in fact this algorithm works on a list of hypothetical prime
 implicants which are compared in pairs several times but it could reduce this
 list by removing progressively the elements which are certainly prime
-implicants.
+implicants. A related improvement would be to find an algorithm which works
+only with MDDs, such an algorithm is more interesting but more difficult to
+conceive.
 
 
 % Bibliography
 
 \bibliographystyle{apalike}
 % Style among : abbrv, acm, alpha, apalike, ieeetr, plain, siam and unsrt.
-\bibliography{bib.bib}
+\bibliography{rapport.bib}
 
 \end{document}

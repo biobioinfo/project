@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Usage:
-#  bash typesetter.sh
+#  bash rapport.sh
 # 
 # Run the pdfTeX typesetter and make the bibliography for TeX to create
 # 'rapport.pdf'.

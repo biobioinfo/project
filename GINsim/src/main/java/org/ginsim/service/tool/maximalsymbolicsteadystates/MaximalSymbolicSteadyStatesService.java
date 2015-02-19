@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Set;
 import java.util.HashSet;
+import java.math.BigDecimal;
 
 import org.mangosdk.spi.ProviderFor;
 import org.ginsim.core.service.Service;
@@ -62,6 +63,10 @@ public class MaximalSymbolicSteadyStatesService implements Service {
 	} catch (Exception exception) {
 	    // Don't care
 	}
+	
+	System.out.println("");
+	System.out.println("Prime implicants:");
+	System.out.println(this.primeImplicants);
 	
 	return;
     }
@@ -424,10 +429,9 @@ public class MaximalSymbolicSteadyStatesService implements Service {
 	// Print the result and the model
 	BasicLogger.debug();
 	BasicLogger.debug(model);
-	BasicLogger.debug();
 	BasicLogger.debug(result);
 	BasicLogger.debug();
-		
+	
 	return;
     }
     

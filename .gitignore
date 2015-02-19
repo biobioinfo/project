@@ -21,3 +21,6 @@ hs_err_pid*
 *.log
 *.out
 *.pdf
+*.nav
+*.snm
+*.toc

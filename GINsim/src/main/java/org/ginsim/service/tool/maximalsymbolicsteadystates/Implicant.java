@@ -18,7 +18,7 @@ public class Implicant {
     }
     
     public String toString() {
-	return "(" + Arrays.toString(p) + ", " + c + ", " + v + ")";
+	return (this.index + ":(" + Arrays.toString(this.p) + ", " + this.c + ", " + this.v + ")");
     }
     
     @Override
