@@ -27,15 +27,15 @@ import org.ginsim.service.tool.attractors.AttractorsService;
 public class AttractorsSwingUI extends LogicalModelActionDialog {
 	private static final long serialVersionUID = 1L;
 	
-	private JComboBox<Algorithm> algoChooser = 
-			new JComboBox<Algorithm>(Algorithm.values()) ;
+	private JComboBox algoChooser = 
+			new JComboBox(Algorithm.values()) ;
 	
 	private JLabel reflab = new JLabel(Txt.t("STR_attractors_ref")) ;
 	
 	private JLabel refLabel = new JLabel(((Algorithm) algoChooser.getSelectedItem()).getReference()) ;
 	
-	private JComboBox<String> updateMethodChooser = 
-			new JComboBox<String>(new String[] {"synchronous", "asynchronous"}) ;
+	private JComboBox updateMethodChooser = 
+			new JComboBox(new String[] {"synchronous", "asynchronous"}) ;
 	
 	private JPanel mainPanel = new JPanel() ;
 	
