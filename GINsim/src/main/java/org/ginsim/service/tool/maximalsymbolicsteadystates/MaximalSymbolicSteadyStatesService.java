@@ -36,6 +36,7 @@ public class MaximalSymbolicSteadyStatesService implements Service {
     private LogicalModel logicalModel = null;
     private List<Implicant> mddImplicants = null;
     private List<Implicant> primeImplicants = null;
+    private List<MaximalSymbolicSteadyState> maximalSymbolicSteadyStates = null;
     
     public void setRegulatoryGraph(RegulatoryGraph regulatoryGraph) {
 	this.regulatoryGraph = regulatoryGraph;
@@ -66,7 +67,13 @@ public class MaximalSymbolicSteadyStatesService implements Service {
 	
 	System.out.println("");
 	System.out.println("Prime implicants:");
-	System.out.println(this.primeImplicants);
+	ListIterator<Implicant> iterator = this.primeImplicants.listIterator();
+	while (iterator.hasNext()) {
+	    Implicant implicant = iterator.next();
+	    System.out.println(implicant);
+	}
+	System.out.println("");
+	//System.out.println(this.primeImplicants);
 	
 	return;
     }
@@ -421,17 +428,49 @@ public class MaximalSymbolicSteadyStatesService implements Service {
 	}
 	
 	// Solve the problem (i.e. maximise the cost)
-	Optimisation.Result result = model.maximise();
+	Optimisation.Result result;
+	Optimisation.State state;
+	this.maximalSymbolicSteadyStates = new ArrayList<MaximalSymbolicSteadyState>();
+	int countConstraint4 = 0;
+	do {
+	    result = model.maximise();
+	    // TODO: comment debug part
+	    BasicLogger.debug();
+	    BasicLogger.debug(model);
+	    BasicLogger.debug(result);
+	    BasicLogger.debug();
+	    // ...
+	    state = result.getState();
+	    
+	    if (state.isSuccess()) {
+		MaximalSymbolicSteadyState maximalSymbolicSteadyState = new MaximalSymbolicSteadyState(this.primeImplicants, result);
+		this.maximalSymbolicSteadyStates.add(maximalSymbolicSteadyState);
+		
+		// Create constraint C4: Or_{x_a in G} x_a  where G = {x_a | x_a not in result}
+		// (i.e.  1 <= Sum_{x_a in G} x_a
+		Expression expression = model.addExpression("C4_" + countConstraint4);
+		countConstraint4 = countConstraint4 + 1;
+		expression.lower(1);
+		List<Integer> arcSet = maximalSymbolicSteadyState.arcSet;
+		ListIterator<Integer> iterator = arcSet.listIterator();
+		while (iterator.hasNext()) {
+		    int arc = iterator.next();
+		    Variable x_a = x.get(arc);
+		    expression.setLinearFactor(x_a, 1);
+		}
+	    } else {
+		// Don't care
+	    }
+	} while (state.isSuccess());
 	
-	// Create constraints C4: ...
-	// TODO: complete
-	
-	// Print the result and the model
-	BasicLogger.debug();
-	BasicLogger.debug(model);
-	BasicLogger.debug(result);
-	BasicLogger.debug();
-	
+	// Print the results
+	System.out.println("Maximal symbolic steady state:");
+	ListIterator<MaximalSymbolicSteadyState> iterator = maximalSymbolicSteadyStates.listIterator();
+	while (iterator.hasNext()) {
+	    MaximalSymbolicSteadyState maximalSymbolicSteadyState = iterator.next();
+	    System.out.println(maximalSymbolicSteadyState);
+	}
+		
 	return;
     }
     
