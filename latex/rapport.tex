@@ -146,9 +146,8 @@ problem using only MDDs. This would have the advantage of not enumerating the
 possibly many states as in our current version. However, we would only get this
 way the number of genes that must be modified, and not which one.
 For the MDD approach to compute attractors, the main solution to speed up the
-process would probably be to implement base operations for MDDs more carefully.
-% TODO: modify the relatively incomprehensible term ``base operations''
-One idea could be to use the observation that states that do not have any
+process would probably be to implement base operations (like variable substitution, universal and existential quantification...) more carefully.
+One other idea could be to use the observation that states that do not have any
 antecendents are necessarily transients. Since it should be possible to check
 this property using MDDs, it should be possible to reduce a great part of the
 state space (actually all the transient states in the synchronous case).
