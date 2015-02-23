@@ -66,8 +66,7 @@
 
 \begin{frame}
   \begin{figure}
-    % TODO: include hematopoietic in folder img
-    %\includegraphics[scale=0.4]{hematopoietic}
+    \includegraphics[scale=0.4]{img/hematopoietic}
     \caption{Boolean Model for blood stem cells}
   \end{figure}
 \end{frame}
@@ -184,8 +183,7 @@
 \begin{frame}
   % TODO: explain example Bonzanni
   \begin{figure}
-    % TODO: include push in folder img
-    %\includegraphics[scale=0.35]{push}
+    \includegraphics[scale=0.35]{img/push}
     \caption{Minimum perturbations for the model from Bonzanni et al.}
   \end{figure}
 \end{frame}
@@ -239,8 +237,8 @@
   
   \begin{block}{Notations}
     \begin{itemize}
-    \item $FR(x) = \{ y,  x \rightarrow^* y \}$ : descendants 
-    \item $BR(x) = \{ y, y \rightarrow^* x \} $ : ancestors
+    \item $FR(x) = \{ y,  x \rightarrow^* y \}$ : descendants of $x$
+    \item $BR(x) = \{ y, y \rightarrow^* x \} $ : ancestors of $x$
     \end{itemize}
   \end{block}
   
@@ -258,8 +256,27 @@
 \end{frame}
 
 \begin{frame}
-  %Asynchronous algorithm
+%Asynchronous algorithm
+
+%Classify attractors
+%Give caracterization of attractor state
+%Give algorithm
+
+\begin{algorithmic}
+\State $states \gets \mathcal{S}$
+\State $Att_{asyn} \gets \emptyset$
+\While{$states \neq \emptyset$} 
+	\State Take $s \in states$ 
+	\If{$FR_{asyn}(s) \subset BR_{asyn}(s)$}
+		\State $Att_{asyn} \gets Att_{asyn} \cup FR_{asyn}(s)$ 
+	\EndIf 
+	\State $states \gets states \setminus BR_{asyn}(s)$
+\EndWhile
+\end{algorithmic}
+
 \end{frame}
+
+
 
 \begin{frame}
   % Bapt : LIP based algo
