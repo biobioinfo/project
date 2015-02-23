@@ -4,6 +4,9 @@
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
 \usepackage{tikz}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
 
 \usetheme{default}
 
@@ -120,6 +123,9 @@ MDD : Extension to multivalued variables
 \item Composition of functions
 
 \bigskip
+\item Comparison of MDDs
+
+\bigskip
 \item Find satisfying assignments
 \end{itemize}
 \end{frame}
@@ -204,9 +210,56 @@ Use only MDDs to compute the minimum number of genes to modify.
 \begin{frame}
 % 3-4 minutes
 	\frametitle{Finding attractors}
-	TODO: describe Garg Algorithm (pseudo-code)
-	TODO: synchrone and asynchrone
-	TODO: idea of improvement
+	\begin{definition}
+	An attractor is a set of states that has no outbound transition, minimal for inclusion.
+	\end{definition}
+\end{frame}
+
+\begin{frame}
+\frametitle{MDD formulation}
+\begin{block}{}
+Given a model, we represent it using MDDs by its transition function $f$:
+$$ f(x,y) =1 \Leftrightarrow x \rightarrow y$$
+\end{block}
+
+\begin{block}{Successor}
+The successors of a set of state $s(x)$ are the states $y$ that satisfy the MDD:
+$$ \exists x, s(x) \wedge f(x,y)$$
+\end{block}
+
+\begin{block}{Predecessor}
+The predecessors of a set of state $s(y)$ are the states $x$ that satisfy the MDD:
+$$ \exists y, s(y) \wedge f(x,y)$$
+\end{block}
+\end{frame}
+
+\begin{frame}
+%Synchronous algorithm
+\frametitle{Synchronous algorithm}
+
+\begin{block}{Notations}
+\begin{itemize}
+\item $FR(x) = \{ y,  x \rightarrow^* y \}$ : descendants 
+\item $BR(x) = \{ y, y \rightarrow^* x \} $ : ancestors
+\end{itemize}
+\end{block}
+
+\bigskip
+\begin{algorithmic}
+\State $states \gets \mathcal S$
+\State $Att_{syn} \gets \emptyset$
+\While{$states \neq \emptyset$}
+	\State $x \gets \text{FindState}(states)$
+	\State $Att_{syn}.add(FR(x))$
+	\State $states \gets states \setminus BR(x)$
+\EndWhile
+\end{algorithmic}
+
+
+\end{frame}
+
+\begin{frame}
+%Asynchronous algorithm
 \end{frame}
 
 \begin{frame}
