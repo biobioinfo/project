@@ -22,6 +22,14 @@ import org.ginsim.gui.GUIManager;
 import org.ginsim.gui.graph.GraphGUI;
 
 
+
+/**
+ * Service which serves as a GUI for the MaximalSymbolicSteadyStatesService.
+ * It contains the UI that is responsible for displaying the different messages
+ * for this service.
+ *
+ * @author Baptiste Lefebvre
+ */
 @ProviderFor(ServiceGUI.class)
 @GUIFor(MaximalSymbolicSteadyStatesService.class)
 @ServiceStatus(EStatus.RELEASED)
