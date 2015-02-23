@@ -7,6 +7,8 @@
 \usepackage{algorithm}
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
+\usepackage{caption}
+\usepackage{subcaption}
 
 \usetheme{default}
 
@@ -71,7 +73,7 @@
   \end{figure}
 \end{frame}
 
-\subsection{Introduction to MDDs}
+\subsection*{Introduction to MDDs}
 % Maybe not put here
 % Slides from previous presentation
 \begin{frame}
@@ -256,27 +258,111 @@
 \end{frame}
 
 \begin{frame}
+\frametitle{Asynchronous algorithm}
 %Asynchronous algorithm
 
-%Classify attractors
-%Give caracterization of attractor state
-%Give algorithm
+\begin{block}{Property}
+A state $x$ is in an attractor $\Leftrightarrow FR(x) \subseteq BR(x)$ 
+\end{block}
 
+\bigskip
 \begin{algorithmic}
 \State $states \gets \mathcal{S}$
 \State $Att_{asyn} \gets \emptyset$
 \While{$states \neq \emptyset$} 
 	\State Take $s \in states$ 
 	\If{$FR_{asyn}(s) \subset BR_{asyn}(s)$}
-		\State $Att_{asyn} \gets Att_{asyn} \cup FR_{asyn}(s)$ 
+		\State $Att_{asyn}.add(FR_{asyn}(s))$ 
 	\EndIf 
 	\State $states \gets states \setminus BR_{asyn}(s)$
 \EndWhile
 \end{algorithmic}
-
 \end{frame}
 
+\begin{frame}
+\frametitle{Attractors classification}
 
+
+\begin{figure}
+\centering
+\begin{subfigure}[t]{0.3\textwidth}
+\begin{tikzpicture}
+\tikzstyle{node} = [draw, circle, black, inner sep = 0pt] ;
+\tikzstyle{arrow} = [->, ultra thick, black] ;
+\node[node] (a) at (0,0) {011}  ;
+\node[node] (b) at (1,0) {010} ;
+\node[node] (c) at (2,0) {001} ;
+\draw[arrow] (a) -- (b) ;
+\draw[arrow] (b) -- (c) ;
+\draw[arrow] (c) to[out= 30, in =-30, looseness =8] (c) ;
+\end{tikzpicture}
+\caption{Boucle}
+\end{subfigure} 
+\qquad 
+\begin{subfigure}[t]{0.3\textwidth}
+\begin{tikzpicture}
+\tikzstyle{node} = [draw, circle, black, inner sep=0pt] ;
+\tikzstyle{arrow} = [->, ultra thick, black] ;
+\node[node] (a) at (0,0) {011}  ;
+\node[node] (b) at (1,0) {010} ;
+\node[node] (c) at (2,0) {0\textbf{0}0} ;
+\node[node] (d) at (3,-0.5) {00\textbf{1}} ;
+\node[node] (e) at (2,-1) {\textbf{1}01} ;
+\draw[arrow] (a) -- (b) ;
+\draw[arrow] (b)-- (c) ;
+\draw[arrow] (c) -- (d) ;
+\draw[arrow] (d) -- (e) ;
+\draw[arrow, dotted] (e) to[out=180, in =-90] (b) ; 
+\end{tikzpicture}
+\caption{Cycle simple}
+\end{subfigure}
+
+\vspace*{0.5cm} 
+\begin{subfigure}[b]{0.3\textwidth}
+\begin{tikzpicture}
+\tikzstyle{node} = [draw, circle, black, inner sep=0pt] ;
+\tikzstyle{arrow} = [->, ultra thick, black] ;
+\node[node] (a) at (0,0) {011}  ;
+\node[node] (b) at (1,0) {010} ;
+\node[node] (c) at (2,0) {0\textbf{01}} ;
+\node[node] (d) at (3,-0.5) {00\textbf{1}} ;
+\node[node] (e) at (2,-1) {\textbf{11}1} ;
+\draw[arrow] (a) -- (b) ;
+\draw[arrow] (b)-- (c) ;
+\draw[arrow] (c) -- (d) ;
+\draw[arrow] (d) -- (e) ;
+\draw[arrow, dotted] (e) to[out=180, in =-90] (b) ; 
+\end{tikzpicture}
+\caption{Cycle synchrone complexe}
+\end{subfigure}
+\qquad 
+\begin{subfigure}[b]{0.3\textwidth}
+\begin{tikzpicture}
+\tikzstyle{node} = [draw, circle, black, inner sep=0pt] ;
+\tikzstyle{arrow} = [->, ultra thick, black] ;
+\node[node] (a) at (0,0) {011}  ;
+\node[node] (b) at (1,0) {010} ;
+\node[node] (c) at (2,0) {000} ;
+\node[node] (d) at (3,0) {001} ;
+\node[node] (e) at (2,-1) {101} ;
+\node[node] (f) at (3,-1) {111} ;
+\draw[arrow] (a) -- (b) ;
+\draw[arrow] (b)-- (c) ;
+\draw[arrow] (c) -- (d) ;
+\draw[arrow] (d) -- (e) ;
+\draw[arrow] (c) -- (e) ;
+\draw[arrow] (f) -- (e) ;
+\draw[arrow] (d) -- (f) ;
+\draw[arrow, dotted] (e) to[out=180, in =-90] (b) ; 
+\end{tikzpicture}
+\caption{Cycle asynchrone complexe}
+\end{subfigure}
+
+
+\caption{Tous les attracteurs possibles. (c) n'apparait que dans le cas synchrone, et (d) n'apparait que dans le cas asynchrone}
+\end{figure}
+
+\end{frame}
 
 \begin{frame}
   % Bapt : LIP based algo
