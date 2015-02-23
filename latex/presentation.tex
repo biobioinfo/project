@@ -3,8 +3,11 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
+\usepackage{tikz}
 
 \usetheme{default}
+
+\newcommand{\bigO}[1]{\mathcal O \left( #1\right)}
 
 
 \title{MPRI 2.19 - Programming project}
@@ -58,17 +61,86 @@
   TEST: cite \cite{Bonzanni}
 \end{frame}
 
+\begin{frame}
+\begin{figure}
+\includegraphics[scale=0.4]{hematopoietic}
+\caption{Boolean Model for blood stem cells}
+\end{figure}
+
+\end{frame}
+
 \subsection{Introduction to MDDs}
 %Maybe not put here
-%Take slides from previous presentation
+%Slides from previous presentation
 \begin{frame}
-% 1-2 minutes
+% 2 minutes
 \frametitle{BDDs/MDDs}
-	TODO: quick description of the data structure
+Représentation compacte d'une fonction booléenne à $n$ variables.
+\begin{figure}
+\begin{tikzpicture}
+\tikzstyle{endnode} = [draw, rectangle, thick, black] ;
+\tikzstyle{varnode} = [draw, circle, thick, black] ;
+\tikzstyle{onearrow} = [->, ultra thick, black] ;
+\tikzstyle{zeroarrow} = [->, ultra thick, black, dotted] ;
+\node[varnode] (x1) at (0,0) {$x_1$} ;
+\node[varnode] (1x2) at (-1,-1) {$x_2$} ;
+\node[varnode] (2x2) at (1,-1) {$x_2$} ;
+\node[varnode] (x4) at (0,-2) {$x_4$} ;
+\node[endnode] (1) at (2,-3) {1} ; 
+\node[endnode] (0) at (-2,-3) {0} ;
+\draw[onearrow] (x1) -- (1x2) ;
+\draw[onearrow] (1x2) to[out=-140, in=90] (0) ;
+\draw[onearrow] (x4) -- (1) ;
+\draw[onearrow] (2x2) -- (x4) ;
+\draw[zeroarrow] (x1) -- (2x2) ;
+\draw[zeroarrow] (2x2) to[out=-170, in = 60] (0) ;
+\draw[zeroarrow] (1x2) -- (x4) ;
+\draw[zeroarrow] (x4) -- (0) ;
+\end{tikzpicture}
+\end{figure}
+
+\begin{definition}
+MDD : Extension to multivalued variables
+\end{definition}
+
 \end{frame}
 
 \begin{frame}
-TODO: quick use case (set/boolean function representation) and operations available
+\frametitle{Operations on MDDs}
+\begin{itemize}
+\item Apply binary operators (ex: AND, OR, EQUAL, ....)
+
+\bigskip
+\item Apply existential/universal quantifiers
+
+\bigskip
+\item Substitute variables
+
+\bigskip
+\item Composition of functions
+
+\bigskip
+\item Find satisfying assignments
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+%Mettre l'intérêt de cette structure de données
+
+\begin{block}{Pros}
+\begin{itemize}
+\item Compact representation of Boolean/Integer functions
+\item Represent a set of states by its indicator function.
+\end{itemize}
+\end{block}
+
+\bigskip
+\begin{block}{Cons}
+\begin{itemize}
+\item De taille potentiellement exponentielle
+\item La taille dépend de l'ordre des variables
+\end{itemize}
+\end{block}
 \end{frame}
 
 % Distribution of tasks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
