@@ -73,7 +73,7 @@
 %Maybe not put here
 %Slides from previous presentation
 \begin{frame}
-% 2 minutes
+% 2 minutes... probably 3 actually
 \frametitle{BDDs/MDDs}
 Représentation compacte d'une fonction booléenne à $n$ variables.
 \begin{figure}
@@ -149,22 +149,57 @@ MDD : Extension to multivalued variables
 
 \begin{frame}
 % 1 minute
-  \frametitle{Distribution of tasks}
-  TODO: complete
-- Finding minimum perturbation
-- MDD based algorithm for attractors
-- LIP based algorithm  
+\frametitle{Distribution of tasks} 
+Implementation of different modules for GINsim
+
+\begin{itemize}
+\item Finding minimum perturbation
+
+\bigskip
+\item MDD based algorithm for computing attractors
+
+%TODO : better description
+\bigskip
+\item LIP based algorithm for computing attractors
+\end{itemize}
   
 \end{frame}
 
 \begin{frame}
 % 2- minutes
+%	explain problem
 	\frametitle{Finding the minimum perturbation}
-	TODO: explain problem
-	TODO: explain example Bonzanni
-	TODO: explain simple solution
-	TODO: idea of improvement
+	\begin{block}{Problem}
+	Given a set of initial states, find the minimum perturbation that allows to reach a given target state.
+	
+	Reformulation : among the ancestors of the target state, find the closest to the source.
+	\end{block}
 \end{frame}
+
+\begin{frame}
+%	TODO: explain example Bonzanni
+\begin{figure}
+\includegraphics[scale=0.35]{push}
+\caption{Minimum perturbations for the model from Bonzanni et al.}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\frametitle{Solution}
+\begin{itemize}
+\item Compute the set of ancestors of the target state.
+
+\bigskip
+\item ennumerate all these states to find the closest
+\end{itemize}
+
+\bigskip
+\onslide<2>
+\begin{block}{Improvement}
+Use only MDDs to compute the minimum number of genes to modify.
+\end{block}
+\end{frame}
+
 
 \begin{frame}
 % 3-4 minutes
