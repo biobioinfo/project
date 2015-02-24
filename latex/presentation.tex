@@ -7,10 +7,18 @@
 \usepackage{algorithm}
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
+\usepackage{amsmath}
 
 \usetheme{default}
 
 \newcommand{\bigO}[1]{\mathcal O \left( #1\right)}
+\newcommand{\F}[0]{\mathcal{F}}
+\newcommand{\SymF}[0]{\mathcal{S}ym\mathcal{F}}
+\newcommand{\LitS}[0]{\mathcal{L}it\mathcal{S}}
+\newcommand{\SymS}[0]{\mathcal{S}ym\mathcal{S}}
+\newcommand{\Seeds}[0]{\mathcal{S}eeds}
+\newcommand{\N}[0]{\mathcal{N}}
+\newcommand{\A}[0]{\mathcal{A}}
 
 
 \title{MPRI 2.19 - Programming project}
@@ -58,28 +66,18 @@
 
 \begin{frame}
   \frametitle{Presentation}    
-  %Implementation of algorthms integrated in GINsim
-  TODO: complete
-  
-  TEST: cite \cite{Bonzanni}
-\end{frame}
-
-\begin{frame}
   \begin{figure}
-    % TODO: include hematopoietic in folder img
-    %\includegraphics[scale=0.4]{hematopoietic}
-    \caption{Boolean Model for blood stem cells}
+    \includegraphics[scale=0.4]{img/hematopoietic}
+    \caption{Boolean Model for blood stem cells \cite{Bonzanni}}
   \end{figure}
 \end{frame}
 
-\subsection{Introduction to MDDs}
 % Maybe not put here
 % Slides from previous presentation
 \begin{frame}
   % 2 minutes... probably 3 actually
   \frametitle{BDDs/MDDs}
-  % TODO: translate
-  Représentation compacte d'une fonction booléenne à $n$ variables.
+  Compact representation of a boolean function with $ n $ variables
   
   \begin{figure}
     \begin{tikzpicture}
@@ -144,9 +142,9 @@
   \begin{block}{Cons}
     \begin{itemize}
     % TODO: translate
-    \item De taille potentiellement exponentielle
+    \item Of potentially exponential size
     % TODO: translate
-    \item La taille dépend de l'ordre des variables
+    \item The size depends on the order of variables
     \end{itemize}
   \end{block}
 \end{frame}
@@ -154,7 +152,7 @@
 
 % Distribution of tasks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Distribution of tasks}
+\section{Distribution and description of tasks}
 
 \begin{frame}
 % 1 minute
@@ -174,6 +172,9 @@
   \end{itemize}
 \end{frame}
 
+
+\subsection{Minimum perturbation}
+
 \begin{frame}
   % 2- minutes
   % explain problem
@@ -188,8 +189,7 @@
 \begin{frame}
   % TODO: explain example Bonzanni
   \begin{figure}
-    % TODO: include push in folder img
-    %\includegraphics[scale=0.35]{push}
+    \includegraphics[scale=0.35]{img/push}
     \caption{Minimum perturbations for the model from Bonzanni et al.}
   \end{figure}
 \end{frame}
@@ -200,7 +200,7 @@
   \item Compute the set of ancestors of the target state.
     \bigskip
     
-  \item ennumerate all these states to find the closest
+  \item Enumerate all these states to find the closest.
   \end{itemize}
   \bigskip
   
@@ -210,6 +210,8 @@
   \end{block}
 \end{frame}
 
+
+\subsection{Attractors via MDD}
 
 \begin{frame}
 % 3-4 minutes
@@ -243,8 +245,8 @@
   
   \begin{block}{Notations}
     \begin{itemize}
-    \item $FR(x) = \{ y,  x \rightarrow^* y \}$ : descendants 
-    \item $BR(x) = \{ y, y \rightarrow^* x \} $ : ancestors
+    \item $FR(x) = \{ y,  x \rightarrow^* y \}$ : descendants of $x$
+    \item $BR(x) = \{ y, y \rightarrow^* x \} $ : ancestors of $x$
     \end{itemize}
   \end{block}
   
@@ -263,12 +265,190 @@
 
 \begin{frame}
   \frametitle{Asynchronous algorithm}
-  TODO: complete
+  %Asynchronous algorithm
+  
+  %Classify attractors
+  %Give caracterization of attractor state
+  %Give algorithm
+  
+  \begin{algorithmic}
+    \State $states \gets \mathcal{S}$
+    \State $Att_{asyn} \gets \emptyset$
+    \While{$states \neq \emptyset$} 
+      \State Take $s \in states$ 
+      \If{$FR_{asyn}(s) \subset BR_{asyn}(s)$}
+        \State $Att_{asyn} \gets Att_{asyn} \cup FR_{asyn}(s)$
+      \EndIf 
+      \State $states \gets states \setminus BR_{asyn}(s)$
+    \EndWhile
+  \end{algorithmic}
+\end{frame}
+
+
+\subsection{Attractors via ILP}
+
+\begin{frame}
+  \frametitle{Toward ILP formulation (I)}
+  \begin{block}{Boolean network $ (V, F) $}
+    \begin{itemize}
+      \item $ V = \{ v_1, \cdots, v_n \} $ : variables
+      \item $ F = \{ f_1, \cdots, f_n \} $ : boolean expressions over $ V $
+    \end{itemize}
+  \end{block}
+  \pause
+  \begin{block}{State transition graph $ (S, \rightarrow) $}
+    \begin{overlayarea}{6cm}{4cm}
+      \begin{itemize}
+      \item $ S = \{ s : V \longrightarrow \mathbb{B} \} $ : state space
+      \item $ F(s) = t $ \\
+        where $ \forall v_i \in V, \; t(v_i) = f_i(s) $
+      \item $ \rightarrow \; \subseteq \; S \times S $ : transitions
+        \pause
+        \begin{itemize}
+          \setlength{\abovedisplayskip}{-11pt}
+          \setlength{\belowdisplayskip}{0pt}
+          \setlength{\abovedisplayshortskip}{0pt}
+          \setlength{\belowdisplayshortskip}{0pt}
+          \only<1>{\item pause 1}
+          \only<2>{\item pause 2}
+          \only<3>{
+          \item synchronous transitions \\
+            \begin{align*}
+              \rightarrow_s = & \{ \left( s, t \right) \mid s \in S, \; t \in S, \; F(s) = t \} &
+            \end{align*}
+          }
+          \only<4>{
+          \item asynchronous transitions \\
+            \begin{align*}
+              \rightarrow_a = \{ \left( s, s \right) \mid & s \in S, \; F(s) = s \} & \\
+              \cup \{ (s, t) \mid & s \in S, \; t \in S, \; \Delta(s, t) = 1, & \\
+              & \Delta(t, F(s)) < \Delta(s, F(s)) \} &
+            \end{align*}
+          }
+          \only<5>{
+          \item $ \cdots $
+          }
+        \end{itemize}
+      \end{itemize}
+    \end{overlayarea}
+  \end{block}
 \end{frame}
 
 \begin{frame}
-  \frametitle{LIP formulation}
-  TODO: complete
+  \frametitle{Toward ILP formulation (II)}
+  \begin{block}{Literal}
+    \begin{itemize}
+    \item $ S = \{ s : V \rightarrow \mathbb{B} \} $ : state space
+    \item $ F(s) = t $ \\
+      where $ \forall v_i \in V, \; t(v_i) = f_i(s) $
+    \item $ \F = \{ s \in S \mid F(s) = s \} $ : fixpoints
+    \end{itemize}
+  \end{block}
+  \pause
+  \begin{block}{Symbolic}
+    \begin{itemize}
+    \item $ SimS = \{ p : U_p \rightarrow \mathbb{B} \mid U_p \subseteq V \} $ : symbolic state space
+    \item $ F[p] = q $ \\
+      where $ U_q = \{v_i \in V \mid f_i[p] \in \mathbb{B} \} $ \\
+      and $ \forall v_i \in U_q, \; q(v_i) = f_i[p] $
+    \item $ \SymF = \{ p \in SimS \mid F[p] = p \} $ : symbolic fixpoints
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Toward ILP formulation (III)}
+  \begin{block}{Relaxed symbolic}
+    \begin{itemize}
+      \item $ \geq \quad \subseteq \; SimS \times SimS $ \\
+        \begin{center}
+          $ p \geq q \quad \Leftrightarrow \quad \begin{cases} p \; \text{and} \; q \; \text{are consistent} \\ U_p \supseteq U_q \end{cases} $
+        \end{center}
+      \item $ \Seeds = \{ p \in SimS \mid F[p] \geq p \} $ : seeds
+    \end{itemize}
+  \end{block}
+  \pause
+  \begin{block}{Trap set}
+    $ R \subseteq S \; \text{is a trap set} \quad \Leftrightarrow \quad \begin{cases} R \neq \varnothing \\ \forall r, s \in R \times S, \; r \rightarrow s \Rightarrow s \in R \end{cases} $
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Central theorem}
+  \begin{block}{Motivation}
+    An inclusion-wise minimal trap set is also called an \emph{attractor} (i.e. \emph{steady state} or \emph{cyclic attractor})
+  \end{block}
+  \pause
+  \begin{theorem}
+    If $ p \in \Seeds $, then $ S[p] $ is a trap set in $ (S, \rightarrow_s) $  and in $ (S, \rightarrow_a) $
+  \end{theorem}
+  \pause
+  \begin{proof}
+    On the blackboard...
+  \end{proof}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Consequences}
+  \begin{center}
+    \begin{equation*}
+      \F \subseteq max(\SymF) = max(\Seeds) \subseteq \SymF \subseteq \Seeds
+    \end{equation*}
+    \bigskip
+    \begin{equation*}
+      \forall p \in max(\Seeds), \; S[p] \; \text{contains at least one attractor}
+    \end{equation*}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Translation (I)}
+  \begin{block}{Prime implicant}
+    \begin{equation*}
+      p \in SymS \; \text{is a c-prime implicant of} \; f_i \notin \mathbb{B} \quad \Leftrightarrow \quad \begin{cases} f[p] = c \in \mathbb{B} \\ \forall q < p, \; f[q] \neq c \end{cases}
+    \end{equation*}
+    \begin{equation*}
+      p \in SymS \; \text{is a c-prime implicant of} \; f_i \in \mathbb{B} \quad \Leftrightarrow \quad \begin{cases} U_p = v_i \\ p(v_i) = c \end{cases}
+    \end{equation*}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Translation (II)}
+  \begin{block}{Prime implicant graph $ (\N, \A) $}
+    \begin{itemize}
+      \item $ \N = \{ p \in \SymS \mid |U_p| = 1 \} $
+      \item
+        \begin{align*}
+          \A = \left\{ \left( \{ p_1, \cdots, p_{|p|} \}, \{ q \} \right) \mid \right. & \exists c \in \mathbb{B}, \; \exists v_i \in V, \\
+          & p \; \text{is a c-prime implicant of} \; f_i, \\
+          & U_q = \{ v_i \}, \; q(v_i) = c \}
+        \end{align*}
+    \end{itemize}
+  \end{block}
+  \begin{block}{Consistent arc set}
+  \end{block}
+  \begin{block}{Stable arc set}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Translation theorem}
+  \begin{theorem}
+    $ p \in \Seeds $ if and only if there is a stable and consistent $ A \in \mathcal{A} $ such that $ H(A) = p $
+  \end{theorem}
+  \begin{proof}
+    See \cite{Klarner}
+  \end{proof}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Consequences}
+  \begin{itemize}
+    \item Straightforward translation of seeds into arc sets (i.e. prime implicant sets)
+    \item Obvious 0-1 optimization problem to compute the maxima of these sets (i.e. trap sets)
+    \item Natural reformulation as linear 0-1 inequalities (with \emph{Oj! Algorithm} or \emph{OjAlgo})
+  \end{itemize}
 \end{frame}
 
 
