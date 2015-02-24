@@ -205,6 +205,9 @@ public class Searcher implements Runnable {
      *       from the quadratic loop
      */
     private List enumeratePrimeImplicantsOfPart(List mddPart) {
+	// DEBUG
+	//System.out.println("Number of MDD parts: " + mddPart.size());
+	
 	List primePart = new ArrayList();
 	boolean flag = false;
 	// For each MDD implicants
@@ -417,6 +420,8 @@ public class Searcher implements Runnable {
 	do {
 	    result = model.maximise();
 	    // TODO: save model.toString()
+	    // DEBUG
+	    BasicLogger.debug(model);
 	    state = result.getState();
 	    
 	    if (state.isSuccess()) {
